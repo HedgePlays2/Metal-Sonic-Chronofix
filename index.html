@@ -7,11 +7,12 @@
 <title>Metal Sonic: Chrono Fix</title>
 
 <style>
+
 body{
     margin:0;
     overflow:hidden;
     background:black;
-    font-family:Comic Sans;
+    font-family:Arial;
 }
 
 canvas{
@@ -28,6 +29,7 @@ canvas{
     text-shadow:2px 2px black;
     z-index:10;
 }
+
 </style>
 </head>
 <body>
@@ -83,6 +85,7 @@ document.addEventListener("keydown", e=>{
 });
 
 document.addEventListener("keyup", e=>{
+
     keys[e.code] = false;
 });
 
@@ -239,7 +242,7 @@ function drawGround(){
 
 
 
-// PALM TREES
+// TREES
 
 function drawPalmTrees(){
 
@@ -283,7 +286,6 @@ function drawPalmTrees(){
 
 function drawPlayer(){
 
-    // world position relative to camera
     const screenX = player.x - cameraX;
 
     // body
@@ -300,8 +302,8 @@ function drawPlayer(){
     ctx.fillStyle = "red";
 
     ctx.fillRect(
-        screenX+8,
-        player.y+15,
+        screenX + 8,
+        player.y + 15,
         34,
         8
     );
@@ -310,8 +312,8 @@ function drawPlayer(){
     ctx.fillStyle = "cyan";
 
     ctx.fillRect(
-        screenX+18,
-        player.y+48,
+        screenX + 18,
+        player.y + 48,
         14,
         10
     );
@@ -492,12 +494,10 @@ function physics(){
 
         player.vx += player.speed;
     }
-
     else if(keys["ArrowLeft"]){
 
         player.vx -= player.speed;
     }
-
     else{
 
         player.vx *= 0.90;
@@ -506,17 +506,15 @@ function physics(){
 
     // speed clamp
     if(player.vx > player.maxSpeed){
-
         player.vx = player.maxSpeed;
     }
 
     if(player.vx < -player.maxSpeed){
-
         player.vx = -player.maxSpeed;
     }
 
 
-    // move player
+    // movement
     player.x += player.vx;
 
 
@@ -527,7 +525,7 @@ function physics(){
     player.grounded = false;
 
 
-    // ground collision
+    // collisions
     ground.forEach(g=>{
 
         if(
@@ -548,29 +546,15 @@ function physics(){
     });
 
 
-    // REAL SONIC CAMERA
+    // CAMERA
 
-    const leftBound = canvas.width * 0.35;
-    const rightBound = canvas.width * 0.65;
+    let targetCamera =
+        player.x - canvas.width / 2;
 
-    // player's screen position
-    const screenX = player.x - cameraX;
+    cameraX +=
+        (targetCamera - cameraX) * 0.08;
 
-    // move camera right
-    if(screenX > rightBound){
-
-        cameraX = player.x - rightBound;
-    }
-
-    // move camera left
-    if(screenX < leftBound){
-
-        cameraX = player.x - leftBound;
-    }
-
-    // stop negative camera
     if(cameraX < 0){
-
         cameraX = 0;
     }
 

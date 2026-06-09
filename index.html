@@ -1,4 +1,4 @@
-```html id="0m9y9s"
+```html id="3c4v0i"
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -11,12 +11,12 @@ body{
     margin:0;
     overflow:hidden;
     background:black;
-    font-family:Arial, sans-serif;
+    font-family:Arial;
 }
 
 canvas{
     display:block;
-    background:linear-gradient(#5cc8ff,#b6ecff);
+    background:linear-gradient(#5cc8ff,#d9f7ff);
 }
 
 #hud{
@@ -42,8 +42,8 @@ canvas{
 const canvas = document.getElementById("game");
 const ctx = canvas.getContext("2d");
 
-canvas.width = window.innerWidth;
-canvas.height = window.innerHeight;
+canvas.width = innerWidth;
+canvas.height = innerHeight;
 
 const gravity = 0.8;
 
@@ -60,7 +60,7 @@ const player = {
     vy:0,
 
     speed:0.7,
-    maxSpeed:12,
+    maxSpeed:13,
 
     grounded:false
 };
@@ -73,7 +73,6 @@ document.addEventListener("keydown",e=>{
 
     if(e.code==="Space" && player.grounded){
         player.vy = -16;
-        player.grounded = false;
     }
 });
 
@@ -82,45 +81,60 @@ document.addEventListener("keyup",e=>{
 });
 
 const ground = [
-    {x:0,y:500,w:900,h:300},
-    {x:1000,y:450,w:700,h:350},
-    {x:1900,y:520,w:900,h:280},
-    {x:3100,y:470,w:1000,h:330},
+
+    // main terrain
+    {x:0,y:550,w:700,h:300},
+    {x:750,y:500,w:400,h:350},
+    {x:1200,y:450,w:500,h:400},
+    {x:1800,y:550,w:700,h:300},
+    {x:2600,y:480,w:500,h:370},
+    {x:3200,y:400,w:700,h:450},
+    {x:4100,y:550,w:900,h:300},
+
+    // floating platforms
+    {x:900,y:320,w:150,h:30},
+    {x:1100,y:250,w:150,h:30},
+    {x:2100,y:350,w:180,h:30},
+    {x:2350,y:280,w:180,h:30},
+    {x:3500,y:260,w:200,h:30},
 ];
 
-const rings = [
+const rings = [];
 
-    {x:450,y:350,collected:false},
-    {x:520,y:320,collected:false},
-    {x:590,y:350,collected:false},
+for(let i=300;i<4700;i+=120){
 
-    {x:1300,y:260,collected:false},
-    {x:1360,y:230,collected:false},
-    {x:1420,y:260,collected:false},
-
-    {x:2400,y:350,collected:false},
-    {x:2470,y:320,collected:false},
-    {x:2540,y:350,collected:false}
-];
-
-const fractures = [];
-
-for(let i=0;i<5;i++){
-    fractures.push({
-        x:Math.random()*canvas.width,
-        speed:0.5 + Math.random()*1.5
+    rings.push({
+        x:i,
+        y:300 + Math.sin(i*0.01)*80,
+        collected:false
     });
 }
+
+const enemies = [
+    {x:1400,y:390,w:40,h:40,dir:1},
+    {x:2800,y:420,w:40,h:40,dir:1},
+    {x:3700,y:340,w:40,h:40,dir:1},
+];
+
+const springs = [
+    {x:1600,y:410,w:40,h:40},
+    {x:3000,y:440,w:40,h:40},
+];
+
+let checkpoint = {
+    x:100,
+    y:200
+};
 
 function drawBackground(){
 
     // mountains
     ctx.fillStyle = "#4db06d";
 
-    for(let i=0;i<10;i++){
+    for(let i=0;i<15;i++){
 
         ctx.beginPath();
-        ctx.arc(i*500 - cameraX*0.3,450,300,Math.PI,0);
+        ctx.arc(i*500 - cameraX*0.3,500,300,Math.PI,0);
         ctx.fill();
     }
 
@@ -133,19 +147,16 @@ function drawGround(){
 
     ground.forEach(g=>{
 
-        // grass
         ctx.fillStyle = "#3cb043";
         ctx.fillRect(g.x-cameraX,g.y,g.w,g.h);
 
-        // dirt
         ctx.fillStyle = "#9b5a2e";
-        ctx.fillRect(g.x-cameraX,g.y+30,g.w,g.h-30);
+        ctx.fillRect(g.x-cameraX,g.y+25,g.w,g.h-25);
 
-        // checker pattern
         ctx.strokeStyle = "#7a431f";
 
         for(let x=0;x<g.w;x+=40){
-            for(let y=30;y<g.h;y+=40){
+            for(let y=25;y<g.h;y+=40){
 
                 ctx.strokeRect(
                     g.x-cameraX+x,
@@ -160,24 +171,34 @@ function drawGround(){
 
 function drawPalmTrees(){
 
-    for(let i=0;i<8;i++){
+    for(let i=0;i<10;i++){
 
-        let x = i*700 + 300 - cameraX*0.9;
+        let x = i*600 + 250 - cameraX*0.9;
 
-        // trunk
         ctx.fillStyle = "#8b4513";
-        ctx.fillRect(x,320,20,180);
+        ctx.fillRect(x,350,20,200);
 
-        // leaves
         ctx.fillStyle = "green";
 
         for(let j=0;j<5;j++){
 
             ctx.beginPath();
-            ctx.arc(x+10,310,50,0,Math.PI*2);
+            ctx.arc(x+10,340,50,0,Math.PI*2);
             ctx.fill();
         }
     }
+}
+
+function drawPlayer(){
+
+    ctx.fillStyle = "#00d9ff";
+    ctx.fillRect(player.x,player.y,player.width,player.height);
+
+    ctx.fillStyle = "red";
+    ctx.fillRect(player.x+8,player.y+15,34,8);
+
+    ctx.fillStyle = "cyan";
+    ctx.fillRect(player.x+18,player.y+48,14,10);
 }
 
 function drawRings(){
@@ -187,7 +208,7 @@ function drawRings(){
         if(!r.collected){
 
             ctx.strokeStyle = "gold";
-            ctx.lineWidth = 6;
+            ctx.lineWidth = 5;
 
             ctx.beginPath();
             ctx.arc(r.x-cameraX,r.y,15,0,Math.PI*2);
@@ -218,59 +239,97 @@ function collectRings(){
     });
 }
 
-function drawTimeFractures(){
+function drawEnemies(){
 
-    ctx.strokeStyle = "rgba(0,255,255,0.25)";
-    ctx.lineWidth = 2;
+    enemies.forEach(e=>{
 
-    fractures.forEach(f=>{
+        ctx.fillStyle = "purple";
 
-        ctx.beginPath();
-        ctx.moveTo(f.x,0);
-        ctx.lineTo(f.x+40,canvas.height);
-        ctx.stroke();
+        ctx.fillRect(
+            e.x-cameraX,
+            e.y,
+            e.w,
+            e.h
+        );
 
-        f.x += f.speed;
+        // movement
+        e.x += e.dir * 2;
 
-        if(f.x > canvas.width+50){
-            f.x = -50;
+        if(Math.random() < 0.01){
+            e.dir *= -1;
+        }
+
+        // collision
+        if(
+            player.x < e.x-cameraX + e.w &&
+            player.x + player.width > e.x-cameraX &&
+            player.y < e.y + e.h &&
+            player.y + player.height > e.y
+        ){
+            respawn();
         }
     });
 }
 
-function drawPlayer(){
+function drawSprings(){
 
-    // body
-    ctx.fillStyle = "#00d9ff";
+    springs.forEach(s=>{
+
+        ctx.fillStyle = "red";
+
+        ctx.fillRect(
+            s.x-cameraX,
+            s.y,
+            s.w,
+            s.h
+        );
+
+        if(
+            player.x < s.x-cameraX + s.w &&
+            player.x + player.width > s.x-cameraX &&
+            player.y < s.y + s.h &&
+            player.y + player.height > s.y
+        ){
+            player.vy = -25;
+        }
+    });
+}
+
+function drawCheckpoint(){
+
+    ctx.fillStyle = "yellow";
+
     ctx.fillRect(
-        player.x,
-        player.y,
-        player.width,
-        player.height
+        3900-cameraX,
+        300,
+        20,
+        120
     );
 
-    // visor
-    ctx.fillStyle = "red";
-    ctx.fillRect(
-        player.x+8,
-        player.y+15,
-        34,
-        8
-    );
+    if(
+        player.x < 3920-cameraX &&
+        player.x + player.width > 3900-cameraX &&
+        player.y < 420 &&
+        player.y + player.height > 300
+    ){
+        checkpoint.x = 3900;
+        checkpoint.y = 200;
+    }
+}
 
-    // jet glow
-    ctx.fillStyle = "cyan";
-    ctx.fillRect(
-        player.x+18,
-        player.y+48,
-        14,
-        10
-    );
+function respawn(){
+
+    player.x = checkpoint.x;
+    player.y = checkpoint.y;
+
+    player.vx = 0;
+    player.vy = 0;
+
+    cameraX = checkpoint.x - 100;
 }
 
 function physics(){
 
-    // acceleration
     if(keys["ArrowRight"]){
         player.vx += player.speed;
     }
@@ -281,7 +340,6 @@ function physics(){
         player.vx *= 0.90;
     }
 
-    // speed clamp
     if(player.vx > player.maxSpeed){
         player.vx = player.maxSpeed;
     }
@@ -292,13 +350,11 @@ function physics(){
 
     player.x += player.vx;
 
-    // gravity
     player.vy += gravity;
     player.y += player.vy;
 
     player.grounded = false;
 
-    // ground collision
     ground.forEach(g=>{
 
         if(
@@ -314,7 +370,6 @@ function physics(){
         }
     });
 
-    // camera follow
     cameraX += player.vx;
 
     if(cameraX < 0){
@@ -323,37 +378,32 @@ function physics(){
 
     // death boundary
     if(player.y > canvas.height + 300){
-
-        // reset player
-        player.x = 100;
-        player.y = 200;
-
-        player.vx = 0;
-        player.vy = 0;
-
-        cameraX = 0;
+        respawn();
     }
 }
 
-function gameLoop(){
+function loop(){
 
     ctx.clearRect(0,0,canvas.width,canvas.height);
 
     drawBackground();
     drawGround();
     drawPalmTrees();
-    drawRings();
-    drawTimeFractures();
 
-    physics();
+    drawRings();
     collectRings();
 
+    drawEnemies();
+    drawSprings();
+    drawCheckpoint();
+
+    physics();
     drawPlayer();
 
-    requestAnimationFrame(gameLoop);
+    requestAnimationFrame(loop);
 }
 
-gameLoop();
+loop();
 </script>
 
 </body>

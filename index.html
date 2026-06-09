@@ -1,4 +1,4 @@
-```html id="3c4v0i"
+```html
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -82,7 +82,7 @@ document.addEventListener("keyup",e=>{
 
 const ground = [
 
-    // main terrain
+    // terrain
     {x:0,y:550,w:700,h:300},
     {x:750,y:500,w:400,h:350},
     {x:1200,y:450,w:500,h:400},
@@ -191,14 +191,17 @@ function drawPalmTrees(){
 
 function drawPlayer(){
 
+    // draw relative to camera
+    let screenX = player.x - cameraX;
+
     ctx.fillStyle = "#00d9ff";
-    ctx.fillRect(player.x,player.y,player.width,player.height);
+    ctx.fillRect(screenX,player.y,player.width,player.height);
 
     ctx.fillStyle = "red";
-    ctx.fillRect(player.x+8,player.y+15,34,8);
+    ctx.fillRect(screenX+8,player.y+15,34,8);
 
     ctx.fillStyle = "cyan";
-    ctx.fillRect(player.x+18,player.y+48,14,10);
+    ctx.fillRect(screenX+18,player.y+48,14,10);
 }
 
 function drawRings(){
@@ -223,12 +226,12 @@ function collectRings(){
 
         if(!r.collected){
 
-            let dx = (r.x-cameraX) - (player.x+25);
+            let dx = r.x - player.x;
             let dy = r.y - (player.y+25);
 
             let dist = Math.sqrt(dx*dx + dy*dy);
 
-            if(dist < 30){
+            if(dist < 40){
 
                 r.collected = true;
                 ringCount++;
@@ -261,8 +264,8 @@ function drawEnemies(){
 
         // collision
         if(
-            player.x < e.x-cameraX + e.w &&
-            player.x + player.width > e.x-cameraX &&
+            player.x < e.x + e.w &&
+            player.x + player.width > e.x &&
             player.y < e.y + e.h &&
             player.y + player.height > e.y
         ){
@@ -285,8 +288,8 @@ function drawSprings(){
         );
 
         if(
-            player.x < s.x-cameraX + s.w &&
-            player.x + player.width > s.x-cameraX &&
+            player.x < s.x + s.w &&
+            player.x + player.width > s.x &&
             player.y < s.y + s.h &&
             player.y + player.height > s.y
         ){
@@ -307,8 +310,8 @@ function drawCheckpoint(){
     );
 
     if(
-        player.x < 3920-cameraX &&
-        player.x + player.width > 3900-cameraX &&
+        player.x < 3920 &&
+        player.x + player.width > 3900 &&
         player.y < 420 &&
         player.y + player.height > 300
     ){
@@ -324,12 +327,11 @@ function respawn(){
 
     player.vx = 0;
     player.vy = 0;
-
-    cameraX = checkpoint.x - 100;
 }
 
 function physics(){
 
+    // movement
     if(keys["ArrowRight"]){
         player.vx += player.speed;
     }
@@ -340,6 +342,7 @@ function physics(){
         player.vx *= 0.90;
     }
 
+    // speed clamp
     if(player.vx > player.maxSpeed){
         player.vx = player.maxSpeed;
     }
@@ -350,16 +353,18 @@ function physics(){
 
     player.x += player.vx;
 
+    // gravity
     player.vy += gravity;
     player.y += player.vy;
 
     player.grounded = false;
 
+    // collisions
     ground.forEach(g=>{
 
         if(
-            player.x + player.width > g.x-cameraX &&
-            player.x < g.x-cameraX + g.w &&
+            player.x + player.width > g.x &&
+            player.x < g.x + g.w &&
             player.y + player.height > g.y &&
             player.y + player.height < g.y + 40
         ){
@@ -370,7 +375,10 @@ function physics(){
         }
     });
 
-    cameraX += player.vx;
+    // Sonic-style smooth camera
+    let targetCamera = player.x - canvas.width / 2;
+
+    cameraX += (targetCamera - cameraX) * 0.08;
 
     if(cameraX < 0){
         cameraX = 0;

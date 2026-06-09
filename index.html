@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>Metal Sonic: Chrono Fix</title>
+  <style>
+    body {
+      margin: 0;
+      background: #000;
+      color: #0ff;
+      font-family: sans-serif;
+      overflow: hidden;
+    }
+    #gameCanvas {
+      display: block;
+      background: #111;
+    }
+    #ui {
+      position: absolute;
+      top: 10px;
+      left: 10px;
+      color: #0ff;
+    }
+  </style>
+</head>
+<body>
+  <canvas id="gameCanvas" width="800" height="450"></canvas>
+  <div id="ui">Metal Sonic: Chrono Fix – Prototype</div>
+
+  <script>
+    const canvas = document.getElementById('gameCanvas');
+    const ctx = canvas.getContext('2d');
+
+    const keys = {};
+    window.addEventListener('keydown', e => keys[e.key] = true);
+    window.addEventListener('keyup', e => keys[e.key] = false);
+
+    // Metal Sonic placeholder
+    const player = {
+      x: 400,
+      y: 300,
+      w: 32,
+      h: 48,
+      speed: 3
+    };
+
+    // simple “bad future remembered” flag
+    let remembersBadFuture = true;
+
+    function update() {
+      if (keys['ArrowLeft'])  player.x -= player.speed;
+      if (keys['ArrowRight']) player.x += player.speed;
+      if (keys['ArrowUp'])    player.y -= player.speed;
+      if (keys['ArrowDown'])  player.y += player.speed;
+    }
+
+    function draw() {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+      // background changes if Metal Sonic remembers
+      if (remembersBadFuture) {
+        const gradient = ctx.createLinearGradient(0, 0, canvas.width, canvas.height);
+        gradient.addColorStop(0, '#220022');
+        gradient.addColorStop(1, '#440000');
+        ctx.fillStyle = gradient;
+      } else {
+        ctx.fillStyle = '#003344';
+      }
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+      // draw Metal Sonic placeholder
+      ctx.fillStyle = '#0ff';
+      ctx.fillRect(player.x - player.w / 2, player.y - player.h / 2, player.w, player.h);
+
+      // text about memory
+      ctx.fillStyle = '#fff';
+      ctx.font = '16px sans-serif';
+      ctx.fillText(
+        remembersBadFuture
+          ? 'Metal Sonic remembers the ruined timeline.'
+          : 'Timeline fixed. Memories gone.',
+        20,
+        canvas.height - 20
+      );
+    }
+
+    function loop() {
+      update();
+      draw();
+      requestAnimationFrame(loop);
+    }
+
+    loop();
+  </script>
+</body>
+</html>

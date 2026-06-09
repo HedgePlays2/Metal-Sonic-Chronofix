@@ -4,67 +4,22 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Metal Sonic: Chrono Fix</title>
+<title>Metal Sonic: Chrono Fix - Green Hill</title>
 
 <style>
-    body{
-        margin:0;
-        overflow:hidden;
-        background:black;
-        font-family:Arial, sans-serif;
-    }
+body{
+    margin:0;
+    overflow:hidden;
+    background:black;
+}
 
-    canvas{
-        display:block;
-        background:linear-gradient(to bottom,#08121f,#0d2742);
-    }
-
-    #hud{
-        position:absolute;
-        top:10px;
-        left:10px;
-        color:white;
-        font-size:20px;
-        text-shadow:2px 2px black;
-        z-index:10;
-    }
-
-    #title{
-        position:absolute;
-        top:40%;
-        width:100%;
-        text-align:center;
-        color:#7ad7ff;
-        font-size:48px;
-        font-weight:bold;
-        text-shadow:0 0 20px cyan;
-        animation:flicker 2s infinite;
-    }
-
-    #subtitle{
-        font-size:22px;
-        color:white;
-        margin-top:10px;
-    }
-
-    @keyframes flicker{
-        0%{opacity:1;}
-        50%{opacity:0.7;}
-        100%{opacity:1;}
-    }
+canvas{
+    display:block;
+    background:linear-gradient(#5cc8ff,#b6ecff);
+}
 </style>
 </head>
 <body>
-
-<div id="hud">
-    TIME FRACTURE: 12%<br>
-    ENERGY: 100
-</div>
-
-<div id="title">
-    METAL SONIC: CHRONO FIX
-    <div id="subtitle">Press SPACE to Begin</div>
-</div>
 
 <canvas id="game"></canvas>
 
@@ -75,99 +30,203 @@ const ctx = canvas.getContext("2d");
 canvas.width = window.innerWidth;
 canvas.height = window.innerHeight;
 
-let gameStarted = false;
+const gravity = 0.8;
 
-const metal = {
-    x:200,
-    y:400,
+const player = {
+    x:100,
+    y:300,
     width:50,
     height:50,
-    speed:6,
+    vx:0,
     vy:0,
+    speed:0.7,
+    maxSpeed:12,
     grounded:false
 };
 
+let cameraX = 0;
+
 const keys = {};
 
-document.addEventListener("keydown", e=>{
-    keys[e.code]=true;
+document.addEventListener("keydown",e=>{
+    keys[e.code] = true;
 
-    if(e.code==="Space"){
-        gameStarted = true;
-        document.getElementById("title").style.display="none";
-
-        if(metal.grounded){
-            metal.vy = -15;
-            metal.grounded = false;
-        }
+    if(e.code==="Space" && player.grounded){
+        player.vy = -16;
+        player.grounded = false;
     }
 });
 
-document.addEventListener("keyup", e=>{
-    keys[e.code]=false;
+document.addEventListener("keyup",e=>{
+    keys[e.code] = false;
 });
 
-function drawMetalSonic(){
-    ctx.fillStyle = "#00d9ff";
-    ctx.fillRect(metal.x, metal.y, metal.width, metal.height);
+const ground = [
+    {x:0,y:500,w:800,h:200},
+    {x:900,y:450,w:600,h:250},
+    {x:1600,y:520,w:900,h:180},
+    {x:2700,y:470,w:700,h:230}
+];
 
-    // red visor
-    ctx.fillStyle = "red";
-    ctx.fillRect(metal.x+8, metal.y+15, 34, 8);
+const rings = [
+    {x:400,y:350},
+    {x:460,y:320},
+    {x:520,y:350},
+    {x:1200,y:280},
+    {x:1260,y:250},
+    {x:1320,y:280}
+];
 
-    // jet glow
-    ctx.fillStyle = "cyan";
-    ctx.fillRect(metal.x+18, metal.y+48, 14, 10);
+function drawBackground(){
+
+    // mountains
+    ctx.fillStyle = "#4db06d";
+
+    for(let i=0;i<10;i++){
+        ctx.beginPath();
+        ctx.arc(i*500 - cameraX*0.3,450,300,Math.PI,0);
+        ctx.fill();
+    }
+
+    // water
+    ctx.fillStyle = "#2ca8ff";
+    ctx.fillRect(0,canvas.height-120,canvas.width,120);
 }
 
 function drawGround(){
-    ctx.fillStyle = "#1f8f3f";
-    ctx.fillRect(0, canvas.height-100, canvas.width, 100);
+
+    ground.forEach(g=>{
+
+        ctx.fillStyle = "#3cb043";
+        ctx.fillRect(g.x-cameraX,g.y,g.w,g.h);
+
+        // dirt
+        ctx.fillStyle = "#9b5a2e";
+        ctx.fillRect(g.x-cameraX,g.y+30,g.w,g.h-30);
+
+        // checker pattern
+        ctx.strokeStyle = "#7a431f";
+
+        for(let x=0;x<g.w;x+=40){
+            for(let y=30;y<g.h;y+=40){
+                ctx.strokeRect(g.x-cameraX+x,g.y+y,40,40);
+            }
+        }
+    });
 }
 
-function drawTimeFractures(){
+function drawPalmTrees(){
+
     for(let i=0;i<8;i++){
-        ctx.strokeStyle = `rgba(0,255,255,${Math.random()})`;
-        ctx.beginPath();
-        ctx.moveTo(Math.random()*canvas.width,0);
-        ctx.lineTo(Math.random()*canvas.width,canvas.height);
-        ctx.stroke();
+
+        let x = i*700 + 300 - cameraX*0.9;
+
+        ctx.fillStyle = "#8b4513";
+        ctx.fillRect(x,320,20,180);
+
+        ctx.fillStyle = "green";
+
+        for(let j=0;j<5;j++){
+            ctx.beginPath();
+            ctx.arc(x+10,310,50,0,Math.PI*2);
+            ctx.fill();
+        }
     }
 }
 
-function update(){
+function drawRings(){
 
+    rings.forEach(r=>{
+
+        ctx.strokeStyle = "gold";
+        ctx.lineWidth = 6;
+
+        ctx.beginPath();
+        ctx.arc(r.x-cameraX,r.y,15,0,Math.PI*2);
+        ctx.stroke();
+    });
+}
+
+function drawPlayer(){
+
+    // body
+    ctx.fillStyle = "#00d9ff";
+    ctx.fillRect(player.x,player.y,player.width,player.height);
+
+    // visor
+    ctx.fillStyle = "red";
+    ctx.fillRect(player.x+8,player.y+15,34,8);
+
+    // jet glow
+    ctx.fillStyle = "cyan";
+    ctx.fillRect(player.x+18,player.y+48,14,10);
+}
+
+function physics(){
+
+    // acceleration
     if(keys["ArrowRight"]){
-        metal.x += metal.speed;
+        player.vx += player.speed;
+    }
+    else if(keys["ArrowLeft"]){
+        player.vx -= player.speed;
+    }
+    else{
+        player.vx *= 0.90;
     }
 
-    if(keys["ArrowLeft"]){
-        metal.x -= metal.speed;
-    }
+    // clamp speed
+    if(player.vx > player.maxSpeed) player.vx = player.maxSpeed;
+    if(player.vx < -player.maxSpeed) player.vx = -player.maxSpeed;
+
+    player.x += player.vx;
 
     // gravity
-    metal.vy += 0.8;
-    metal.y += metal.vy;
+    player.vy += gravity;
+    player.y += player.vy;
 
-    // ground collision
-    if(metal.y + metal.height >= canvas.height - 100){
-        metal.y = canvas.height - 100 - metal.height;
-        metal.vy = 0;
-        metal.grounded = true;
-    }
+    player.grounded = false;
+
+    ground.forEach(g=>{
+
+        if(
+            player.x + player.width > g.x-cameraX &&
+            player.x < g.x-cameraX + g.w &&
+            player.y + player.height > g.y &&
+            player.y + player.height < g.y + 40
+        ){
+            player.y = g.y - player.height;
+            player.vy = 0;
+            player.grounded = true;
+        }
+    });
+
+    // camera follow
+    cameraX += player.vx;
+
+    if(cameraX < 0) cameraX = 0;
+}
+
+function drawHUD(){
+
+    ctx.fillStyle = "white";
+    ctx.font = "30px Arial";
+    ctx.fillText("GREEN HILL - CHRONO FRACTURE",20,50);
 }
 
 function loop(){
 
     ctx.clearRect(0,0,canvas.width,canvas.height);
 
+    drawBackground();
     drawGround();
+    drawPalmTrees();
+    drawRings();
 
-    if(gameStarted){
-        drawTimeFractures();
-        update();
-        drawMetalSonic();
-    }
+    physics();
+    drawPlayer();
+
+    drawHUD();
 
     requestAnimationFrame(loop);
 }

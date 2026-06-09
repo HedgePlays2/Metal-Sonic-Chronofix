@@ -1,25 +1,40 @@
-```html
+```html id="0m9y9s"
 <!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Metal Sonic: Chrono Fix - Green Hill</title>
+<title>Metal Sonic: Chrono Fix</title>
 
 <style>
 body{
     margin:0;
     overflow:hidden;
     background:black;
+    font-family:Arial, sans-serif;
 }
 
 canvas{
     display:block;
     background:linear-gradient(#5cc8ff,#b6ecff);
 }
+
+#hud{
+    position:absolute;
+    top:10px;
+    left:15px;
+    color:white;
+    font-size:24px;
+    text-shadow:2px 2px black;
+}
 </style>
 </head>
 <body>
+
+<div id="hud">
+    GREEN HILL — CHRONO FRACTURE<br>
+    RINGS: <span id="rings">0</span>
+</div>
 
 <canvas id="game"></canvas>
 
@@ -32,23 +47,28 @@ canvas.height = window.innerHeight;
 
 const gravity = 0.8;
 
+let cameraX = 0;
+let ringCount = 0;
+
 const player = {
     x:100,
-    y:300,
+    y:200,
     width:50,
     height:50,
+
     vx:0,
     vy:0,
+
     speed:0.7,
     maxSpeed:12,
+
     grounded:false
 };
-
-let cameraX = 0;
 
 const keys = {};
 
 document.addEventListener("keydown",e=>{
+
     keys[e.code] = true;
 
     if(e.code==="Space" && player.grounded){
@@ -62,20 +82,35 @@ document.addEventListener("keyup",e=>{
 });
 
 const ground = [
-    {x:0,y:500,w:800,h:200},
-    {x:900,y:450,w:600,h:250},
-    {x:1600,y:520,w:900,h:180},
-    {x:2700,y:470,w:700,h:230}
+    {x:0,y:500,w:900,h:300},
+    {x:1000,y:450,w:700,h:350},
+    {x:1900,y:520,w:900,h:280},
+    {x:3100,y:470,w:1000,h:330},
 ];
 
 const rings = [
-    {x:400,y:350},
-    {x:460,y:320},
-    {x:520,y:350},
-    {x:1200,y:280},
-    {x:1260,y:250},
-    {x:1320,y:280}
+
+    {x:450,y:350,collected:false},
+    {x:520,y:320,collected:false},
+    {x:590,y:350,collected:false},
+
+    {x:1300,y:260,collected:false},
+    {x:1360,y:230,collected:false},
+    {x:1420,y:260,collected:false},
+
+    {x:2400,y:350,collected:false},
+    {x:2470,y:320,collected:false},
+    {x:2540,y:350,collected:false}
 ];
+
+const fractures = [];
+
+for(let i=0;i<5;i++){
+    fractures.push({
+        x:Math.random()*canvas.width,
+        speed:0.5 + Math.random()*1.5
+    });
+}
 
 function drawBackground(){
 
@@ -83,6 +118,7 @@ function drawBackground(){
     ctx.fillStyle = "#4db06d";
 
     for(let i=0;i<10;i++){
+
         ctx.beginPath();
         ctx.arc(i*500 - cameraX*0.3,450,300,Math.PI,0);
         ctx.fill();
@@ -97,6 +133,7 @@ function drawGround(){
 
     ground.forEach(g=>{
 
+        // grass
         ctx.fillStyle = "#3cb043";
         ctx.fillRect(g.x-cameraX,g.y,g.w,g.h);
 
@@ -109,7 +146,13 @@ function drawGround(){
 
         for(let x=0;x<g.w;x+=40){
             for(let y=30;y<g.h;y+=40){
-                ctx.strokeRect(g.x-cameraX+x,g.y+y,40,40);
+
+                ctx.strokeRect(
+                    g.x-cameraX+x,
+                    g.y+y,
+                    40,
+                    40
+                );
             }
         }
     });
@@ -121,12 +164,15 @@ function drawPalmTrees(){
 
         let x = i*700 + 300 - cameraX*0.9;
 
+        // trunk
         ctx.fillStyle = "#8b4513";
         ctx.fillRect(x,320,20,180);
 
+        // leaves
         ctx.fillStyle = "green";
 
         for(let j=0;j<5;j++){
+
             ctx.beginPath();
             ctx.arc(x+10,310,50,0,Math.PI*2);
             ctx.fill();
@@ -138,12 +184,57 @@ function drawRings(){
 
     rings.forEach(r=>{
 
-        ctx.strokeStyle = "gold";
-        ctx.lineWidth = 6;
+        if(!r.collected){
+
+            ctx.strokeStyle = "gold";
+            ctx.lineWidth = 6;
+
+            ctx.beginPath();
+            ctx.arc(r.x-cameraX,r.y,15,0,Math.PI*2);
+            ctx.stroke();
+        }
+    });
+}
+
+function collectRings(){
+
+    rings.forEach(r=>{
+
+        if(!r.collected){
+
+            let dx = (r.x-cameraX) - (player.x+25);
+            let dy = r.y - (player.y+25);
+
+            let dist = Math.sqrt(dx*dx + dy*dy);
+
+            if(dist < 30){
+
+                r.collected = true;
+                ringCount++;
+
+                document.getElementById("rings").innerText = ringCount;
+            }
+        }
+    });
+}
+
+function drawTimeFractures(){
+
+    ctx.strokeStyle = "rgba(0,255,255,0.25)";
+    ctx.lineWidth = 2;
+
+    fractures.forEach(f=>{
 
         ctx.beginPath();
-        ctx.arc(r.x-cameraX,r.y,15,0,Math.PI*2);
+        ctx.moveTo(f.x,0);
+        ctx.lineTo(f.x+40,canvas.height);
         ctx.stroke();
+
+        f.x += f.speed;
+
+        if(f.x > canvas.width+50){
+            f.x = -50;
+        }
     });
 }
 
@@ -151,15 +242,30 @@ function drawPlayer(){
 
     // body
     ctx.fillStyle = "#00d9ff";
-    ctx.fillRect(player.x,player.y,player.width,player.height);
+    ctx.fillRect(
+        player.x,
+        player.y,
+        player.width,
+        player.height
+    );
 
     // visor
     ctx.fillStyle = "red";
-    ctx.fillRect(player.x+8,player.y+15,34,8);
+    ctx.fillRect(
+        player.x+8,
+        player.y+15,
+        34,
+        8
+    );
 
     // jet glow
     ctx.fillStyle = "cyan";
-    ctx.fillRect(player.x+18,player.y+48,14,10);
+    ctx.fillRect(
+        player.x+18,
+        player.y+48,
+        14,
+        10
+    );
 }
 
 function physics(){
@@ -175,9 +281,14 @@ function physics(){
         player.vx *= 0.90;
     }
 
-    // clamp speed
-    if(player.vx > player.maxSpeed) player.vx = player.maxSpeed;
-    if(player.vx < -player.maxSpeed) player.vx = -player.maxSpeed;
+    // speed clamp
+    if(player.vx > player.maxSpeed){
+        player.vx = player.maxSpeed;
+    }
+
+    if(player.vx < -player.maxSpeed){
+        player.vx = -player.maxSpeed;
+    }
 
     player.x += player.vx;
 
@@ -187,6 +298,7 @@ function physics(){
 
     player.grounded = false;
 
+    // ground collision
     ground.forEach(g=>{
 
         if(
@@ -196,6 +308,7 @@ function physics(){
             player.y + player.height < g.y + 40
         ){
             player.y = g.y - player.height;
+
             player.vy = 0;
             player.grounded = true;
         }
@@ -204,17 +317,25 @@ function physics(){
     // camera follow
     cameraX += player.vx;
 
-    if(cameraX < 0) cameraX = 0;
+    if(cameraX < 0){
+        cameraX = 0;
+    }
+
+    // death boundary
+    if(player.y > canvas.height + 300){
+
+        // reset player
+        player.x = 100;
+        player.y = 200;
+
+        player.vx = 0;
+        player.vy = 0;
+
+        cameraX = 0;
+    }
 }
 
-function drawHUD(){
-
-    ctx.fillStyle = "white";
-    ctx.font = "30px Arial";
-    ctx.fillText("GREEN HILL - CHRONO FRACTURE",20,50);
-}
-
-function loop(){
+function gameLoop(){
 
     ctx.clearRect(0,0,canvas.width,canvas.height);
 
@@ -222,16 +343,17 @@ function loop(){
     drawGround();
     drawPalmTrees();
     drawRings();
+    drawTimeFractures();
 
     physics();
+    collectRings();
+
     drawPlayer();
 
-    drawHUD();
-
-    requestAnimationFrame(loop);
+    requestAnimationFrame(gameLoop);
 }
 
-loop();
+gameLoop();
 </script>
 
 </body>

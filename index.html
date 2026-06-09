@@ -1,96 +1,180 @@
+```html
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <title>Metal Sonic: Chrono Fix</title>
-  <style>
-    body {
-      margin: 0;
-      background: #000;
-      color: #0ff;
-      font-family: sans-serif;
-      overflow: hidden;
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Metal Sonic: Chrono Fix</title>
+
+<style>
+    body{
+        margin:0;
+        overflow:hidden;
+        background:black;
+        font-family:Arial, sans-serif;
     }
-    #gameCanvas {
-      display: block;
-      background: #111;
+
+    canvas{
+        display:block;
+        background:linear-gradient(to bottom,#08121f,#0d2742);
     }
-    #ui {
-      position: absolute;
-      top: 10px;
-      left: 10px;
-      color: #0ff;
+
+    #hud{
+        position:absolute;
+        top:10px;
+        left:10px;
+        color:white;
+        font-size:20px;
+        text-shadow:2px 2px black;
+        z-index:10;
     }
-  </style>
+
+    #title{
+        position:absolute;
+        top:40%;
+        width:100%;
+        text-align:center;
+        color:#7ad7ff;
+        font-size:48px;
+        font-weight:bold;
+        text-shadow:0 0 20px cyan;
+        animation:flicker 2s infinite;
+    }
+
+    #subtitle{
+        font-size:22px;
+        color:white;
+        margin-top:10px;
+    }
+
+    @keyframes flicker{
+        0%{opacity:1;}
+        50%{opacity:0.7;}
+        100%{opacity:1;}
+    }
+</style>
 </head>
 <body>
-  <canvas id="gameCanvas" width="800" height="450"></canvas>
-  <div id="ui">Metal Sonic: Chrono Fix – Prototype</div>
 
-  <script>
-    const canvas = document.getElementById('gameCanvas');
-    const ctx = canvas.getContext('2d');
+<div id="hud">
+    TIME FRACTURE: 12%<br>
+    ENERGY: 100
+</div>
 
-    const keys = {};
-    window.addEventListener('keydown', e => keys[e.key] = true);
-    window.addEventListener('keyup', e => keys[e.key] = false);
+<div id="title">
+    METAL SONIC: CHRONO FIX
+    <div id="subtitle">Press SPACE to Begin</div>
+</div>
 
-    // Metal Sonic placeholder
-    const player = {
-      x: 400,
-      y: 300,
-      w: 32,
-      h: 48,
-      speed: 3
-    };
+<canvas id="game"></canvas>
 
-    // simple “bad future remembered” flag
-    let remembersBadFuture = true;
+<script>
+const canvas = document.getElementById("game");
+const ctx = canvas.getContext("2d");
 
-    function update() {
-      if (keys['ArrowLeft'])  player.x -= player.speed;
-      if (keys['ArrowRight']) player.x += player.speed;
-      if (keys['ArrowUp'])    player.y -= player.speed;
-      if (keys['ArrowDown'])  player.y += player.speed;
+canvas.width = window.innerWidth;
+canvas.height = window.innerHeight;
+
+let gameStarted = false;
+
+const metal = {
+    x:200,
+    y:400,
+    width:50,
+    height:50,
+    speed:6,
+    vy:0,
+    grounded:false
+};
+
+const keys = {};
+
+document.addEventListener("keydown", e=>{
+    keys[e.code]=true;
+
+    if(e.code==="Space"){
+        gameStarted = true;
+        document.getElementById("title").style.display="none";
+
+        if(metal.grounded){
+            metal.vy = -15;
+            metal.grounded = false;
+        }
+    }
+});
+
+document.addEventListener("keyup", e=>{
+    keys[e.code]=false;
+});
+
+function drawMetalSonic(){
+    ctx.fillStyle = "#00d9ff";
+    ctx.fillRect(metal.x, metal.y, metal.width, metal.height);
+
+    // red visor
+    ctx.fillStyle = "red";
+    ctx.fillRect(metal.x+8, metal.y+15, 34, 8);
+
+    // jet glow
+    ctx.fillStyle = "cyan";
+    ctx.fillRect(metal.x+18, metal.y+48, 14, 10);
+}
+
+function drawGround(){
+    ctx.fillStyle = "#1f8f3f";
+    ctx.fillRect(0, canvas.height-100, canvas.width, 100);
+}
+
+function drawTimeFractures(){
+    for(let i=0;i<8;i++){
+        ctx.strokeStyle = `rgba(0,255,255,${Math.random()})`;
+        ctx.beginPath();
+        ctx.moveTo(Math.random()*canvas.width,0);
+        ctx.lineTo(Math.random()*canvas.width,canvas.height);
+        ctx.stroke();
+    }
+}
+
+function update(){
+
+    if(keys["ArrowRight"]){
+        metal.x += metal.speed;
     }
 
-    function draw() {
-      ctx.clearRect(0, 0, canvas.width, canvas.height);
-
-      // background changes if Metal Sonic remembers
-      if (remembersBadFuture) {
-        const gradient = ctx.createLinearGradient(0, 0, canvas.width, canvas.height);
-        gradient.addColorStop(0, '#220022');
-        gradient.addColorStop(1, '#440000');
-        ctx.fillStyle = gradient;
-      } else {
-        ctx.fillStyle = '#003344';
-      }
-      ctx.fillRect(0, 0, canvas.width, canvas.height);
-
-      // draw Metal Sonic placeholder
-      ctx.fillStyle = '#0ff';
-      ctx.fillRect(player.x - player.w / 2, player.y - player.h / 2, player.w, player.h);
-
-      // text about memory
-      ctx.fillStyle = '#fff';
-      ctx.font = '16px sans-serif';
-      ctx.fillText(
-        remembersBadFuture
-          ? 'Metal Sonic remembers the ruined timeline.'
-          : 'Timeline fixed. Memories gone.',
-        20,
-        canvas.height - 20
-      );
+    if(keys["ArrowLeft"]){
+        metal.x -= metal.speed;
     }
 
-    function loop() {
-      update();
-      draw();
-      requestAnimationFrame(loop);
+    // gravity
+    metal.vy += 0.8;
+    metal.y += metal.vy;
+
+    // ground collision
+    if(metal.y + metal.height >= canvas.height - 100){
+        metal.y = canvas.height - 100 - metal.height;
+        metal.vy = 0;
+        metal.grounded = true;
+    }
+}
+
+function loop(){
+
+    ctx.clearRect(0,0,canvas.width,canvas.height);
+
+    drawGround();
+
+    if(gameStarted){
+        drawTimeFractures();
+        update();
+        drawMetalSonic();
     }
 
-    loop();
-  </script>
+    requestAnimationFrame(loop);
+}
+
+loop();
+</script>
+
 </body>
 </html>
+```

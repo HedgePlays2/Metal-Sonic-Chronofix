@@ -1,4 +1,4 @@
-```html id="m5bq1m"
+```html
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -99,7 +99,7 @@ const ground = [
     {x:3600,y:400,w:800,h:450},
     {x:4600,y:550,w:1200,h:300},
 
-    // platforms
+    // floating platforms
     {x:1000,y:320,w:160,h:30},
     {x:1250,y:260,w:160,h:30},
     {x:2400,y:350,w:200,h:30},
@@ -234,7 +234,7 @@ function drawGround(){
 
 
 
-// PALM TREES
+// TREES
 
 function drawPalmTrees(){
 
@@ -278,7 +278,8 @@ function drawPalmTrees(){
 
 function drawPlayer(){
 
-    const screenX = player.x - cameraX;
+    // Sonic-style centered player
+    const screenX = canvas.width / 2;
 
     // body
     ctx.fillStyle = "#00d9ff";
@@ -497,7 +498,7 @@ function physics(){
     }
 
 
-    // clamp speed
+    // speed clamp
     if(player.vx > player.maxSpeed){
 
         player.vx = player.maxSpeed;
@@ -541,19 +542,12 @@ function physics(){
     });
 
 
-    // SONIC-STYLE CAMERA
+    // SONIC CAMERA
 
-    let lookAhead = player.vx * 12;
+    let lookAhead = player.vx * 8;
 
-    let targetCamera =
-        player.x
-        - canvas.width / 2
-        + lookAhead;
+    cameraX = player.x - 300 + lookAhead;
 
-    // smooth follow
-    cameraX += (targetCamera - cameraX) * 0.12;
-
-    // stop before start
     if(cameraX < 0){
 
         cameraX = 0;
@@ -569,7 +563,7 @@ function physics(){
 
 
 
-// GAME LOOP
+// LOOP
 
 function loop(){
 

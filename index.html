@@ -1,4 +1,4 @@
-```html id="v4p8nm"
+```html
 <!DOCTYPE html>
 <html>
 <head>
@@ -10,23 +10,13 @@ body{
     margin:0;
     overflow:hidden;
     background:black;
+    font-family:Arial;
 }
 
 canvas{
     display:block;
-    background:#6ec6ff;
+    background:black;
     image-rendering:pixelated;
-}
-
-#hud{
-    position:absolute;
-    top:10px;
-    left:10px;
-    color:white;
-    font-size:32px;
-    font-family:Arial;
-    text-shadow:3px 3px black;
-    z-index:5;
 }
 
 #titleScreen{
@@ -39,9 +29,9 @@ canvas{
     background:
     linear-gradient(
         to bottom,
+        #000000,
         #001122,
-        #003366,
-        #0066aa
+        #003366
     );
 
     display:flex;
@@ -51,7 +41,7 @@ canvas{
     justify-content:center;
     align-items:center;
 
-    z-index:10;
+    z-index:20;
 }
 
 #gameTitle{
@@ -60,34 +50,32 @@ canvas{
 
     font-size:80px;
 
-    font-family:Arial;
+    text-align:center;
 
     text-shadow:
     0 0 10px cyan,
     0 0 20px cyan,
     0 0 40px cyan;
-
-    text-align:center;
 }
 
 #subtitle{
 
     color:white;
 
-    font-size:28px;
+    font-size:26px;
 
     margin-top:20px;
 
     text-shadow:2px 2px black;
 }
 
-#startText{
-
-    margin-top:60px;
+#pressStart{
 
     color:yellow;
 
     font-size:36px;
+
+    margin-top:60px;
 
     animation:blink 1s infinite;
 
@@ -99,6 +87,43 @@ canvas{
     0%{opacity:1;}
     50%{opacity:0;}
     100%{opacity:1;}
+}
+
+#hud{
+
+    position:absolute;
+
+    top:10px;
+    left:10px;
+
+    color:white;
+
+    font-size:32px;
+
+    text-shadow:3px 3px black;
+
+    z-index:5;
+}
+
+#introText{
+
+    position:absolute;
+
+    width:100%;
+
+    top:40%;
+
+    text-align:center;
+
+    color:white;
+
+    font-size:42px;
+
+    text-shadow:3px 3px black;
+
+    z-index:15;
+
+    display:none;
 }
 
 </style>
@@ -118,11 +143,17 @@ canvas{
         A Sonic Fangame
     </div>
 
-    <div id="startText">
+    <div id="pressStart">
         PRESS SPACE
     </div>
 
 </div>
+
+
+
+<!-- INTRO TEXT -->
+
+<div id="introText"></div>
 
 
 
@@ -151,44 +182,17 @@ ctx.imageSmoothingEnabled = false;
 
 
 
-// =====================
-// TITLE SCREEN
-// =====================
+// ====================
+// GAME STATES
+// ====================
 
-let gameStarted = false;
-
-document.addEventListener("keydown", e=>{
-
-    keys[e.code] = true;
-
-    // START GAME
-    if(e.code === "Space" && !gameStarted){
-
-        gameStarted = true;
-
-        document
-        .getElementById("titleScreen")
-        .style.display = "none";
-    }
-
-    // JUMP
-    else if(e.code === "Space" && player.grounded){
-
-        player.vy = -18;
-    }
-});
-
-document.addEventListener("keyup", e=>{
-
-    keys[e.code] = false;
-});
+let gameState = "title";
 
 
 
-
-// =====================
+// ====================
 // SPRITES
-// =====================
+// ====================
 
 const idleSprite = new Image();
 idleSprite.src = "idle.png";
@@ -198,37 +202,25 @@ springSprite.src = "spring.png";
 
 
 
-
-// =====================
+// ====================
 // CAMERA
-// =====================
+// ====================
 
 let cameraX = 0;
 
 
 
-
-// =====================
+// ====================
 // RINGS
-// =====================
+// ====================
 
 let rings = 0;
 
 
 
-
-// =====================
-// PHYSICS
-// =====================
-
-const gravity = 0.8;
-
-
-
-
-// =====================
+// ====================
 // PLAYER
-// =====================
+// ====================
 
 const player = {
 
@@ -246,19 +238,94 @@ const player = {
 
 
 
-
-// =====================
+// ====================
 // INPUT
-// =====================
+// ====================
 
 const keys = {};
 
+document.addEventListener("keydown", e=>{
+
+    keys[e.code] = true;
+
+    // START INTRO
+    if(e.code === "Space" && gameState === "title"){
+
+        document
+        .getElementById("titleScreen")
+        .style.display = "none";
+
+        startIntro();
+    }
+
+    // JUMP
+    if(e.code === "Space" && gameState === "game"){
+
+        if(player.grounded){
+
+            player.vy = -18;
+        }
+    }
+});
+
+document.addEventListener("keyup", e=>{
+
+    keys[e.code] = false;
+});
 
 
 
-// =====================
+// ====================
+// INTRO
+// ====================
+
+function startIntro(){
+
+    gameState = "intro";
+
+    const intro = document.getElementById("introText");
+
+    intro.style.display = "block";
+
+    const lines = [
+
+        "35 YEARS.",
+        "NO ONE COULD KILL SONIC.",
+        "UNTIL HIM.",
+        "THE TIMELINE COLLAPSED.",
+        "REALITY BEGAN TO BREAK.",
+        "ONLY METAL SONIC SURVIVED."
+    ];
+
+    let index = 0;
+
+    function nextLine(){
+
+        if(index < lines.length){
+
+            intro.innerText = lines[index];
+
+            index++;
+
+            setTimeout(nextLine,2000);
+        }
+        else{
+
+            intro.style.display = "none";
+
+            gameState = "game";
+        }
+    }
+
+    nextLine();
+}
+
+
+
+
+// ====================
 // LEVEL
-// =====================
+// ====================
 
 const level = [
 
@@ -283,10 +350,9 @@ const level = [
 
 
 
-
-// =====================
+// ====================
 // SPRINGS
-// =====================
+// ====================
 
 const springs = [
 
@@ -299,10 +365,9 @@ const springs = [
 
 
 
-
-// =====================
+// ====================
 // RINGS
-// =====================
+// ====================
 
 const ringList = [];
 
@@ -320,9 +385,9 @@ for(let i=300;i<13000;i+=150){
 
 
 
-// =====================
+// ====================
 // BACKGROUND
-// =====================
+// ====================
 
 function drawBackground(){
 
@@ -370,9 +435,9 @@ function drawBackground(){
 
 
 
-// =====================
+// ====================
 // GROUND
-// =====================
+// ====================
 
 function drawGround(){
 
@@ -425,9 +490,9 @@ function drawGround(){
 
 
 
-// =====================
+// ====================
 // SPRINGS
-// =====================
+// ====================
 
 function drawSprings(){
 
@@ -462,9 +527,9 @@ function drawSprings(){
 
 
 
-// =====================
+// ====================
 // PLAYER
-// =====================
+// ====================
 
 function drawPlayer(){
 
@@ -507,9 +572,9 @@ function drawPlayer(){
 
 
 
-// =====================
+// ====================
 // RINGS
-// =====================
+// ====================
 
 function drawRings(){
 
@@ -518,6 +583,7 @@ function drawRings(){
         if(!r.collected){
 
             ctx.strokeStyle = "gold";
+
             ctx.lineWidth = 5;
 
             ctx.beginPath();
@@ -541,9 +607,9 @@ function drawRings(){
 
 
 
-// =====================
+// ====================
 // COLLECT RINGS
-// =====================
+// ====================
 
 function collectRings(){
 
@@ -573,13 +639,13 @@ function collectRings(){
 
 
 
-// =====================
+// ====================
 // PHYSICS
-// =====================
+// ====================
 
 function physics(){
 
-    // movement
+    // move
     if(keys["ArrowRight"]){
 
         player.vx += 0.7;
@@ -605,7 +671,7 @@ function physics(){
     player.x += player.vx;
 
     // gravity
-    player.vy += gravity;
+    player.vy += 0.8;
 
     player.y += player.vy;
 
@@ -643,30 +709,18 @@ function physics(){
     if(cameraX < 0){
         cameraX = 0;
     }
-
-    // death
-    if(player.y > canvas.height + 500){
-
-        player.x = 100;
-        player.y = 300;
-
-        player.vx = 0;
-        player.vy = 0;
-
-        cameraX = 0;
-    }
 }
 
 
 
 
-// =====================
+// ====================
 // GAME LOOP
-// =====================
+// ====================
 
 function loop(){
 
-    if(gameStarted){
+    if(gameState === "game"){
 
         drawBackground();
 

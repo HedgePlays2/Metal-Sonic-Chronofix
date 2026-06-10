@@ -1,4 +1,4 @@
-```html id="n3f7v2"
+```html id="k8f4zn"
 <!DOCTYPE html>
 <html>
 <head>
@@ -9,6 +9,7 @@
 body{
     margin:0;
     overflow:hidden;
+    background:black;
 }
 
 canvas{
@@ -48,20 +49,41 @@ canvas.height = window.innerHeight;
 
 ctx.imageSmoothingEnabled = false;
 
+
+
+// SPRITE
+
 const idleSprite = new Image();
 idleSprite.src = "idle.png";
 
+
+
+// CAMERA
+
 let cameraX = 0;
+
+
+
+// RINGS
+
 let rings = 0;
 
+
+
+// GRAVITY
+
 const gravity = 0.8;
+
+
+
+// PLAYER
 
 const player = {
 
     x:100,
     y:300,
 
-    width:96,
+    width:64,
     height:96,
 
     vx:0,
@@ -69,6 +91,10 @@ const player = {
 
     grounded:false
 };
+
+
+
+// INPUT
 
 const keys = {};
 
@@ -89,18 +115,30 @@ document.addEventListener("keyup", e=>{
 
 
 
+
 // LEVEL
 
 const level = [
 
-    {x:0,y:550,w:2000,h:300},
-    {x:2300,y:500,w:600,h:350},
+    {x:0,y:550,w:1800,h:300},
+
+    {x:2100,y:500,w:700,h:350},
+
     {x:3200,y:450,w:600,h:400},
-    {x:4200,y:550,w:1800,h:300},
-    {x:6500,y:450,w:500,h:30},
-    {x:7200,y:350,w:500,h:30},
-    {x:8000,y:550,w:2500,h:300}
+
+    {x:4300,y:550,w:1800,h:300},
+
+    {x:6700,y:450,w:500,h:30},
+
+    {x:7400,y:350,w:500,h:30},
+
+    {x:8200,y:550,w:2500,h:300},
+
+    {x:11100,y:450,w:600,h:30},
+
+    {x:12000,y:550,w:1600,h:300}
 ];
+
 
 
 
@@ -108,7 +146,7 @@ const level = [
 
 const ringList = [];
 
-for(let i=300;i<10000;i+=150){
+for(let i=300;i<13000;i+=150){
 
     ringList.push({
 
@@ -121,7 +159,8 @@ for(let i=300;i<10000;i+=150){
 
 
 
-// DRAW BACKGROUND
+
+// BACKGROUND
 
 function drawBackground(){
 
@@ -168,7 +207,8 @@ function drawBackground(){
 
 
 
-// DRAW GROUND
+
+// GROUND
 
 function drawGround(){
 
@@ -220,7 +260,8 @@ function drawGround(){
 
 
 
-// DRAW PLAYER
+
+// PLAYER
 
 function drawPlayer(){
 
@@ -228,6 +269,7 @@ function drawPlayer(){
 
     ctx.save();
 
+    // flip left
     if(player.vx < 0){
 
         ctx.scale(-1,1);
@@ -236,10 +278,10 @@ function drawPlayer(){
 
             idleSprite,
 
-            -screenX - 96,
+            -screenX - 64,
             player.y,
 
-            96,
+            64,
             96
         );
     }
@@ -252,7 +294,7 @@ function drawPlayer(){
             screenX,
             player.y,
 
-            96,
+            64,
             96
         );
     }
@@ -262,7 +304,8 @@ function drawPlayer(){
 
 
 
-// DRAW RINGS
+
+// RINGS
 
 function drawRings(){
 
@@ -293,6 +336,7 @@ function drawRings(){
 
 
 
+
 // COLLECT RINGS
 
 function collectRings(){
@@ -320,11 +364,12 @@ function collectRings(){
 
 
 
+
 // PHYSICS
 
 function physics(){
 
-    // move
+    // movement
     if(keys["ArrowRight"]){
 
         player.vx += 0.7;
@@ -338,7 +383,7 @@ function physics(){
         player.vx *= 0.90;
     }
 
-    // speed clamp
+    // speed cap
     if(player.vx > 14){
         player.vx = 14;
     }
@@ -404,7 +449,8 @@ function physics(){
 
 
 
-// GAME LOOP
+
+// LOOP
 
 function loop(){
 

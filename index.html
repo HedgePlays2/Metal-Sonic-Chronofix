@@ -1,4 +1,4 @@
-```html id="k8f4zn"
+```html id="m4v9sx"
 <!DOCTYPE html>
 <html>
 <head>
@@ -51,32 +51,45 @@ ctx.imageSmoothingEnabled = false;
 
 
 
-// SPRITE
+// ====================
+// SPRITES
+// ====================
 
 const idleSprite = new Image();
 idleSprite.src = "idle.png";
 
+const springSprite = new Image();
+springSprite.src = "spring.png";
 
 
+
+// ====================
 // CAMERA
+// ====================
 
 let cameraX = 0;
 
 
 
+// ====================
 // RINGS
+// ====================
 
 let rings = 0;
 
 
 
-// GRAVITY
+// ====================
+// PHYSICS
+// ====================
 
 const gravity = 0.8;
 
 
 
+// ====================
 // PLAYER
+// ====================
 
 const player = {
 
@@ -94,7 +107,9 @@ const player = {
 
 
 
+// ====================
 // INPUT
+// ====================
 
 const keys = {};
 
@@ -116,7 +131,9 @@ document.addEventListener("keyup", e=>{
 
 
 
+// ====================
 // LEVEL
+// ====================
 
 const level = [
 
@@ -142,7 +159,25 @@ const level = [
 
 
 
+// ====================
+// SPRINGS
+// ====================
+
+const springs = [
+
+    {x:1800,y:486,w:64,h:64},
+
+    {x:5200,y:486,w:64,h:64},
+
+    {x:7600,y:286,w:64,h:64}
+];
+
+
+
+
+// ====================
 // RINGS
+// ====================
 
 const ringList = [];
 
@@ -160,7 +195,9 @@ for(let i=300;i<13000;i+=150){
 
 
 
+// ====================
 // BACKGROUND
+// ====================
 
 function drawBackground(){
 
@@ -208,7 +245,9 @@ function drawBackground(){
 
 
 
+// ====================
 // GROUND
+// ====================
 
 function drawGround(){
 
@@ -261,7 +300,46 @@ function drawGround(){
 
 
 
+// ====================
+// SPRINGS
+// ====================
+
+function drawSprings(){
+
+    springs.forEach(s=>{
+
+        ctx.drawImage(
+
+            springSprite,
+
+            s.x-cameraX,
+            s.y,
+
+            s.w,
+            s.h
+        );
+
+        // collision
+        if(
+
+            player.x + player.width > s.x &&
+            player.x < s.x + s.w &&
+
+            player.y + player.height > s.y &&
+            player.y < s.y + s.h
+        ){
+
+            player.vy = -30;
+        }
+    });
+}
+
+
+
+
+// ====================
 // PLAYER
+// ====================
 
 function drawPlayer(){
 
@@ -305,7 +383,9 @@ function drawPlayer(){
 
 
 
+// ====================
 // RINGS
+// ====================
 
 function drawRings(){
 
@@ -337,7 +417,9 @@ function drawRings(){
 
 
 
+// ====================
 // COLLECT RINGS
+// ====================
 
 function collectRings(){
 
@@ -365,7 +447,9 @@ function collectRings(){
 
 
 
+// ====================
 // PHYSICS
+// ====================
 
 function physics(){
 
@@ -450,7 +534,9 @@ function physics(){
 
 
 
-// LOOP
+// ====================
+// GAME LOOP
+// ====================
 
 function loop(){
 
@@ -459,6 +545,8 @@ function loop(){
     drawGround();
 
     drawRings();
+
+    drawSprings();
 
     collectRings();
 

@@ -1,4 +1,4 @@
-```html id="m4v9sx"
+```html id="v4p8nm"
 <!DOCTYPE html>
 <html>
 <head>
@@ -26,16 +26,116 @@ canvas{
     font-size:32px;
     font-family:Arial;
     text-shadow:3px 3px black;
+    z-index:5;
+}
+
+#titleScreen{
+
+    position:absolute;
+
+    width:100%;
+    height:100%;
+
+    background:
+    linear-gradient(
+        to bottom,
+        #001122,
+        #003366,
+        #0066aa
+    );
+
+    display:flex;
+
+    flex-direction:column;
+
+    justify-content:center;
+    align-items:center;
+
+    z-index:10;
+}
+
+#gameTitle{
+
+    color:#7ee7ff;
+
+    font-size:80px;
+
+    font-family:Arial;
+
+    text-shadow:
+    0 0 10px cyan,
+    0 0 20px cyan,
+    0 0 40px cyan;
+
+    text-align:center;
+}
+
+#subtitle{
+
+    color:white;
+
+    font-size:28px;
+
+    margin-top:20px;
+
+    text-shadow:2px 2px black;
+}
+
+#startText{
+
+    margin-top:60px;
+
+    color:yellow;
+
+    font-size:36px;
+
+    animation:blink 1s infinite;
+
+    text-shadow:2px 2px black;
+}
+
+@keyframes blink{
+
+    0%{opacity:1;}
+    50%{opacity:0;}
+    100%{opacity:1;}
 }
 
 </style>
 </head>
 <body>
 
+<!-- TITLE SCREEN -->
+
+<div id="titleScreen">
+
+    <div id="gameTitle">
+        METAL SONIC<br>
+        CHRONO FIX
+    </div>
+
+    <div id="subtitle">
+        A Sonic Fangame
+    </div>
+
+    <div id="startText">
+        PRESS SPACE
+    </div>
+
+</div>
+
+
+
+<!-- HUD -->
+
 <div id="hud">
 GREEN HILL — CHRONO FRACTURE<br>
 RINGS: <span id="rings">0</span>
 </div>
+
+
+
+<!-- GAME -->
 
 <canvas id="game"></canvas>
 
@@ -51,9 +151,44 @@ ctx.imageSmoothingEnabled = false;
 
 
 
-// ====================
+// =====================
+// TITLE SCREEN
+// =====================
+
+let gameStarted = false;
+
+document.addEventListener("keydown", e=>{
+
+    keys[e.code] = true;
+
+    // START GAME
+    if(e.code === "Space" && !gameStarted){
+
+        gameStarted = true;
+
+        document
+        .getElementById("titleScreen")
+        .style.display = "none";
+    }
+
+    // JUMP
+    else if(e.code === "Space" && player.grounded){
+
+        player.vy = -18;
+    }
+});
+
+document.addEventListener("keyup", e=>{
+
+    keys[e.code] = false;
+});
+
+
+
+
+// =====================
 // SPRITES
-// ====================
+// =====================
 
 const idleSprite = new Image();
 idleSprite.src = "idle.png";
@@ -63,33 +198,37 @@ springSprite.src = "spring.png";
 
 
 
-// ====================
+
+// =====================
 // CAMERA
-// ====================
+// =====================
 
 let cameraX = 0;
 
 
 
-// ====================
+
+// =====================
 // RINGS
-// ====================
+// =====================
 
 let rings = 0;
 
 
 
-// ====================
+
+// =====================
 // PHYSICS
-// ====================
+// =====================
 
 const gravity = 0.8;
 
 
 
-// ====================
+
+// =====================
 // PLAYER
-// ====================
+// =====================
 
 const player = {
 
@@ -107,33 +246,19 @@ const player = {
 
 
 
-// ====================
+
+// =====================
 // INPUT
-// ====================
+// =====================
 
 const keys = {};
 
-document.addEventListener("keydown", e=>{
-
-    keys[e.code] = true;
-
-    if(e.code === "Space" && player.grounded){
-
-        player.vy = -18;
-    }
-});
-
-document.addEventListener("keyup", e=>{
-
-    keys[e.code] = false;
-});
 
 
 
-
-// ====================
+// =====================
 // LEVEL
-// ====================
+// =====================
 
 const level = [
 
@@ -159,9 +284,9 @@ const level = [
 
 
 
-// ====================
+// =====================
 // SPRINGS
-// ====================
+// =====================
 
 const springs = [
 
@@ -175,9 +300,9 @@ const springs = [
 
 
 
-// ====================
+// =====================
 // RINGS
-// ====================
+// =====================
 
 const ringList = [];
 
@@ -195,9 +320,9 @@ for(let i=300;i<13000;i+=150){
 
 
 
-// ====================
+// =====================
 // BACKGROUND
-// ====================
+// =====================
 
 function drawBackground(){
 
@@ -245,9 +370,9 @@ function drawBackground(){
 
 
 
-// ====================
+// =====================
 // GROUND
-// ====================
+// =====================
 
 function drawGround(){
 
@@ -300,9 +425,9 @@ function drawGround(){
 
 
 
-// ====================
+// =====================
 // SPRINGS
-// ====================
+// =====================
 
 function drawSprings(){
 
@@ -319,7 +444,7 @@ function drawSprings(){
             s.h
         );
 
-        // collision
+        // bounce
         if(
 
             player.x + player.width > s.x &&
@@ -337,9 +462,9 @@ function drawSprings(){
 
 
 
-// ====================
+// =====================
 // PLAYER
-// ====================
+// =====================
 
 function drawPlayer(){
 
@@ -347,7 +472,6 @@ function drawPlayer(){
 
     ctx.save();
 
-    // flip left
     if(player.vx < 0){
 
         ctx.scale(-1,1);
@@ -383,9 +507,9 @@ function drawPlayer(){
 
 
 
-// ====================
+// =====================
 // RINGS
-// ====================
+// =====================
 
 function drawRings(){
 
@@ -417,9 +541,9 @@ function drawRings(){
 
 
 
-// ====================
+// =====================
 // COLLECT RINGS
-// ====================
+// =====================
 
 function collectRings(){
 
@@ -438,7 +562,9 @@ function collectRings(){
 
                 rings++;
 
-                document.getElementById("rings").innerText = rings;
+                document
+                .getElementById("rings")
+                .innerText = rings;
             }
         }
     });
@@ -447,9 +573,9 @@ function collectRings(){
 
 
 
-// ====================
+// =====================
 // PHYSICS
-// ====================
+// =====================
 
 function physics(){
 
@@ -534,25 +660,28 @@ function physics(){
 
 
 
-// ====================
+// =====================
 // GAME LOOP
-// ====================
+// =====================
 
 function loop(){
 
-    drawBackground();
+    if(gameStarted){
 
-    drawGround();
+        drawBackground();
 
-    drawRings();
+        drawGround();
 
-    drawSprings();
+        drawRings();
 
-    collectRings();
+        drawSprings();
 
-    physics();
+        collectRings();
 
-    drawPlayer();
+        physics();
+
+        drawPlayer();
+    }
 
     requestAnimationFrame(loop);
 }

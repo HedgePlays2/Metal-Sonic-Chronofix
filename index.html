@@ -319,69 +319,66 @@ function drawTrees(){
 let animFrame = 0;
 let animTimer = 0;
 
+```javascript id="v8k2pa"
 function drawPlayer(){
 
     const screenX = player.x - cameraX;
 
-    animTimer++;
+    ctx.save();
 
-    if(animTimer > 6){
+    // flip left/right
+    if(player.vx < 0){
 
-        animFrame++;
-        animTimer = 0;
-    }
-
-    // RUN
-    if(Math.abs(player.vx) > 1){
-
-        if(animFrame > 5){
-            animFrame = 0;
-        }
+        ctx.scale(-1,1);
 
         ctx.drawImage(
 
             metalSprite,
 
-            // sprite source
-            10 + animFrame * 36,
-            160,
+            // SOURCE X/Y
+            310,
+            10,
 
-            36,
-            36,
+            // SOURCE SIZE
+            50,
+            50,
 
-            // draw position
-            screenX,
+            // DESTINATION
+            -screenX - 96,
             player.y,
 
-            72,
-            72
+            // DRAW SIZE
+            96,
+            96
         );
     }
-
-    // IDLE
     else{
 
         ctx.drawImage(
 
             metalSprite,
 
-            5,
-            78,
+            // SOURCE X/Y
+            310,
+            10,
 
-            36,
-            36,
+            // SOURCE SIZE
+            50,
+            50,
 
+            // DESTINATION
             screenX,
             player.y,
 
-            72,
-            72
+            // DRAW SIZE
+            96,
+            96
         );
     }
+
+    ctx.restore();
 }
-
-
-
+```
 
 // RINGS
 

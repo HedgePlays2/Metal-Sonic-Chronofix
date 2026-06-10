@@ -1,4 +1,4 @@
-```html id="a8vn2q"
+```html id="5n3wkp"
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -54,17 +54,18 @@ canvas.height = window.innerHeight;
 
 ctx.imageSmoothingEnabled = false;
 
-const gravity = 0.8;
-
 let cameraX = 0;
 let ringCount = 0;
 
+const gravity = 0.8;
 
 
-// SPRITE SHEET
 
-const metalSprite = new Image();
-metalSprite.src = "metalsonic.png";
+// IDLE SPRITE
+
+const idleSprite = new Image();
+idleSprite.src = "idle.png";
+
 
 
 
@@ -75,8 +76,8 @@ const player = {
     x:100,
     y:300,
 
-    width:72,
-    height:72,
+    width:96,
+    height:96,
 
     vx:0,
     vy:0,
@@ -86,6 +87,7 @@ const player = {
 
     grounded:false
 };
+
 
 
 
@@ -111,42 +113,44 @@ document.addEventListener("keyup", e=>{
 
 
 
-// LEVEL
+// FULL MAP
 
 const ground = [
 
-    {x:0,y:550,w:1800,h:300},
+    // starting area
+    {x:0,y:550,w:1200,h:300},
 
-    {x:1900,y:500,w:600,h:350},
+    // hill
+    {x:1300,y:500,w:600,h:350},
 
-    {x:2700,y:620,w:500,h:230},
+    // dip
+    {x:2100,y:620,w:500,h:230},
 
-    {x:3300,y:540,w:600,h:310},
+    // climb
+    {x:2800,y:550,w:500,h:300},
+    {x:3400,y:470,w:600,h:380},
 
-    {x:4000,y:450,w:700,h:400},
+    // platform route
+    {x:4300,y:400,w:300,h:30},
+    {x:4700,y:320,w:300,h:30},
+    {x:5100,y:240,w:300,h:30},
 
-    // platforms
-    {x:5200,y:350,w:250,h:30},
-    {x:5600,y:270,w:250,h:30},
-    {x:6000,y:190,w:250,h:30},
+    // lower route
+    {x:4200,y:550,w:1800,h:300},
 
-    // lower path
-    {x:5000,y:550,w:1800,h:300},
+    // bridge area
+    {x:6400,y:500,w:1200,h:350},
 
-    // bridge
-    {x:7200,y:500,w:1200,h:350},
+    // jump section
+    {x:8000,y:450,w:250,h:30},
+    {x:8400,y:350,w:250,h:30},
+    {x:8800,y:250,w:250,h:30},
 
-    // platform section
-    {x:9000,y:420,w:240,h:30},
-    {x:9400,y:340,w:240,h:30},
-    {x:9800,y:260,w:240,h:30},
-    {x:10200,y:340,w:240,h:30},
-
-    // speed runway
-    {x:10700,y:550,w:2500,h:300},
+    // long runway
+    {x:9400,y:550,w:2500,h:300},
 
     // boss arena
-    {x:13500,y:550,w:2000,h:300},
+    {x:12200,y:550,w:1500,h:300}
 ];
 
 
@@ -156,12 +160,12 @@ const ground = [
 
 const rings = [];
 
-for(let i=300;i<15000;i+=140){
+for(let i=300;i<13500;i+=140){
 
     rings.push({
 
         x:i,
-        y:300 + Math.sin(i*0.01)*90,
+        y:300 + Math.sin(i*0.01)*80,
 
         collected:false
     });
@@ -170,24 +174,25 @@ for(let i=300;i<15000;i+=140){
 
 
 
-// ENEMIES
+// SPRINGS
 
-const enemies = [
+const springs = [
 
-    {x:2500,y:440,w:50,h:50,dir:1},
-    {x:6200,y:500,w:50,h:50,dir:1},
-    {x:11300,y:500,w:50,h:50,dir:1},
+    {x:2400,y:570,w:40,h:40},
+    {x:7200,y:450,w:40,h:40},
+    {x:10000,y:500,w:40,h:40}
 ];
 
 
 
 
-// SPRINGS
+// ENEMIES
 
-const springs = [
+const enemies = [
 
-    {x:3000,y:500,w:40,h:40},
-    {x:8500,y:500,w:40,h:40},
+    {x:1800,y:450,w:50,h:50,dir:1},
+    {x:5000,y:500,w:50,h:50,dir:1},
+    {x:9500,y:500,w:50,h:50,dir:1}
 ];
 
 
@@ -276,7 +281,7 @@ function drawGround(){
 
 
 
-// TREES
+// PALM TREES
 
 function drawTrees(){
 
@@ -314,40 +319,26 @@ function drawTrees(){
 
 
 
-// PLAYER SPRITES
+// PLAYER
 
-let animFrame = 0;
-let animTimer = 0;
-
-```javascript id="v8k2pa"
 function drawPlayer(){
 
     const screenX = player.x - cameraX;
 
     ctx.save();
 
-    // flip left/right
+    // flip sprite
     if(player.vx < 0){
 
         ctx.scale(-1,1);
 
         ctx.drawImage(
 
-            metalSprite,
+            idleSprite,
 
-            // SOURCE X/Y
-            310,
-            10,
-
-            // SOURCE SIZE
-            50,
-            50,
-
-            // DESTINATION
             -screenX - 96,
             player.y,
 
-            // DRAW SIZE
             96,
             96
         );
@@ -356,21 +347,11 @@ function drawPlayer(){
 
         ctx.drawImage(
 
-            metalSprite,
+            idleSprite,
 
-            // SOURCE X/Y
-            310,
-            10,
-
-            // SOURCE SIZE
-            50,
-            50,
-
-            // DESTINATION
             screenX,
             player.y,
 
-            // DRAW SIZE
             96,
             96
         );
@@ -378,7 +359,9 @@ function drawPlayer(){
 
     ctx.restore();
 }
-```
+
+
+
 
 // RINGS
 
@@ -434,48 +417,6 @@ function collectRings(){
 
 
 
-// ENEMIES
-
-function drawEnemies(){
-
-    enemies.forEach(e=>{
-
-        ctx.fillStyle = "purple";
-
-        ctx.fillRect(
-            e.x-cameraX,
-            e.y,
-            e.w,
-            e.h
-        );
-
-        e.x += e.dir * 2;
-
-        if(Math.random() < 0.01){
-
-            e.dir *= -1;
-        }
-
-        if(
-
-            player.x < e.x + e.w &&
-            player.x + player.width > e.x &&
-
-            player.y < e.y + e.h &&
-            player.y + player.height > e.y
-        ){
-
-            player.x = 100;
-            player.y = 300;
-
-            cameraX = 0;
-        }
-    });
-}
-
-
-
-
 // SPRINGS
 
 function drawSprings(){
@@ -508,11 +449,66 @@ function drawSprings(){
 
 
 
+// ENEMIES
+
+function drawEnemies(){
+
+    enemies.forEach(e=>{
+
+        ctx.fillStyle = "purple";
+
+        ctx.fillRect(
+            e.x-cameraX,
+            e.y,
+            e.w,
+            e.h
+        );
+
+        e.x += e.dir * 2;
+
+        if(Math.random() < 0.01){
+
+            e.dir *= -1;
+        }
+
+        if(
+
+            player.x < e.x + e.w &&
+            player.x + player.width > e.x &&
+
+            player.y < e.y + e.h &&
+            player.y + player.height > e.y
+        ){
+
+            respawn();
+        }
+    });
+}
+
+
+
+
+// RESPAWN
+
+function respawn(){
+
+    player.x = 100;
+    player.y = 300;
+
+    player.vx = 0;
+    player.vy = 0;
+
+    cameraX = 0;
+}
+
+
+
+
 // PHYSICS
 
 function physics(){
 
-    // move
+    // movement
     if(keys["ArrowRight"]){
 
         player.vx += player.speed;
@@ -526,7 +522,7 @@ function physics(){
         player.vx *= 0.90;
     }
 
-    // clamp
+    // speed limit
     if(player.vx > player.maxSpeed){
         player.vx = player.maxSpeed;
     }
@@ -543,7 +539,7 @@ function physics(){
 
     player.grounded = false;
 
-    // collision
+    // collisions
     ground.forEach(g=>{
 
         if(
@@ -563,9 +559,9 @@ function physics(){
         }
     });
 
-    // CAMERA FIX
+    // camera
     let targetCamera =
-        player.x - canvas.width / 2;
+        player.x - canvas.width/2;
 
     cameraX +=
         (targetCamera - cameraX) * 0.1;
@@ -577,17 +573,14 @@ function physics(){
     // death
     if(player.y > canvas.height + 400){
 
-        player.x = 100;
-        player.y = 300;
-
-        cameraX = 0;
+        respawn();
     }
 }
 
 
 
 
-// LOOP
+// GAME LOOP
 
 function loop(){
 
@@ -608,9 +601,9 @@ function loop(){
 
     collectRings();
 
-    drawEnemies();
-
     drawSprings();
+
+    drawEnemies();
 
     physics();
 

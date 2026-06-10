@@ -1,4 +1,4 @@
-```html
+```html id="f9k2qm"
 <!DOCTYPE html>
 <html>
 <head>
@@ -151,7 +151,7 @@ canvas{
 
 
 
-<!-- INTRO TEXT -->
+<!-- INTRO -->
 
 <div id="introText"></div>
 
@@ -183,7 +183,7 @@ ctx.imageSmoothingEnabled = false;
 
 
 // ====================
-// GAME STATES
+// GAME STATE
 // ====================
 
 let gameState = "title";
@@ -239,6 +239,30 @@ const player = {
 
 
 // ====================
+// CHECKPOINTS
+// ====================
+
+const checkpoints = [
+
+    {
+        x:3000,
+        y:420,
+        active:false
+    },
+
+    {
+        x:8500,
+        y:420,
+        active:false
+    }
+];
+
+let respawnX = 100;
+let respawnY = 300;
+
+
+
+// ====================
 // INPUT
 // ====================
 
@@ -248,7 +272,7 @@ document.addEventListener("keydown", e=>{
 
     keys[e.code] = true;
 
-    // START INTRO
+    // START GAME
     if(e.code === "Space" && gameState === "title"){
 
         document
@@ -528,6 +552,66 @@ function drawSprings(){
 
 
 // ====================
+// CHECKPOINTS
+// ====================
+
+function drawCheckpoints(){
+
+    checkpoints.forEach(c=>{
+
+        // pole
+        ctx.fillStyle = "silver";
+
+        ctx.fillRect(
+
+            c.x-cameraX,
+            c.y,
+
+            12,
+            120
+        );
+
+        // orb
+        ctx.fillStyle =
+            c.active ? "lime" : "red";
+
+        ctx.beginPath();
+
+        ctx.arc(
+
+            c.x-cameraX + 6,
+            c.y,
+
+            20,
+
+            0,
+            Math.PI*2
+        );
+
+        ctx.fill();
+
+        // activate
+        if(
+
+            player.x + player.width > c.x &&
+            player.x < c.x + 20 &&
+
+            player.y + player.height > c.y &&
+            player.y < c.y + 120
+        ){
+
+            c.active = true;
+
+            respawnX = c.x;
+            respawnY = c.y - 120;
+        }
+    });
+}
+
+
+
+
+// ====================
 // PLAYER
 // ====================
 
@@ -668,11 +752,13 @@ function physics(){
         player.vx = -14;
     }
 
+    // move X
     player.x += player.vx;
 
     // gravity
     player.vy += 0.8;
 
+    // move Y
     player.y += player.vy;
 
     player.grounded = false;
@@ -686,7 +772,9 @@ function physics(){
             player.x < g.x + g.w &&
 
             player.y + player.height > g.y &&
-            player.y + player.height < g.y + 60
+            player.y + player.height < g.y + 40 &&
+
+            player.vy >= 0
         ){
 
             player.y = g.y - player.height;
@@ -707,7 +795,26 @@ function physics(){
         (targetCamera-cameraX)*0.1;
 
     if(cameraX < 0){
+
         cameraX = 0;
+    }
+
+    // death
+    if(player.y > 1200){
+
+        player.x = respawnX;
+        player.y = respawnY;
+
+        player.vx = 0;
+        player.vy = 0;
+
+        cameraX =
+            respawnX - canvas.width/2;
+
+        if(cameraX < 0){
+
+            cameraX = 0;
+        }
     }
 }
 
@@ -729,6 +836,8 @@ function loop(){
         drawRings();
 
         drawSprings();
+
+        drawCheckpoints();
 
         collectRings();
 

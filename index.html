@@ -1,9 +1,7 @@
-```html id="5n3wkp"
+```html id="n3f7v2"
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Metal Sonic: Chrono Fix</title>
 
 <style>
@@ -11,26 +9,22 @@
 body{
     margin:0;
     overflow:hidden;
-    background:black;
-    font-family:Arial;
 }
 
 canvas{
     display:block;
-    width:100vw;
-    height:100vh;
-    background:linear-gradient(#5cc8ff,#d9f7ff);
-    image-rendering: pixelated;
+    background:#6ec6ff;
+    image-rendering:pixelated;
 }
 
 #hud{
     position:absolute;
     top:10px;
-    left:15px;
+    left:10px;
     color:white;
-    font-size:24px;
-    text-shadow:2px 2px black;
-    z-index:10;
+    font-size:32px;
+    font-family:Arial;
+    text-shadow:3px 3px black;
 }
 
 </style>
@@ -38,8 +32,8 @@ canvas{
 <body>
 
 <div id="hud">
-    GREEN HILL — CHRONO FRACTURE<br>
-    RINGS: <span id="rings">0</span>
+GREEN HILL — CHRONO FRACTURE<br>
+RINGS: <span id="rings">0</span>
 </div>
 
 <canvas id="game"></canvas>
@@ -54,22 +48,13 @@ canvas.height = window.innerHeight;
 
 ctx.imageSmoothingEnabled = false;
 
-let cameraX = 0;
-let ringCount = 0;
-
-const gravity = 0.8;
-
-
-
-// IDLE SPRITE
-
 const idleSprite = new Image();
 idleSprite.src = "idle.png";
 
+let cameraX = 0;
+let rings = 0;
 
-
-
-// PLAYER
+const gravity = 0.8;
 
 const player = {
 
@@ -82,16 +67,8 @@ const player = {
     vx:0,
     vy:0,
 
-    speed:0.7,
-    maxSpeed:14,
-
     grounded:false
 };
-
-
-
-
-// INPUT
 
 const keys = {};
 
@@ -112,60 +89,31 @@ document.addEventListener("keyup", e=>{
 
 
 
+// LEVEL
 
-// FULL MAP
+const level = [
 
-const ground = [
-
-    // starting area
-    {x:0,y:550,w:1200,h:300},
-
-    // hill
-    {x:1300,y:500,w:600,h:350},
-
-    // dip
-    {x:2100,y:620,w:500,h:230},
-
-    // climb
-    {x:2800,y:550,w:500,h:300},
-    {x:3400,y:470,w:600,h:380},
-
-    // platform route
-    {x:4300,y:400,w:300,h:30},
-    {x:4700,y:320,w:300,h:30},
-    {x:5100,y:240,w:300,h:30},
-
-    // lower route
+    {x:0,y:550,w:2000,h:300},
+    {x:2300,y:500,w:600,h:350},
+    {x:3200,y:450,w:600,h:400},
     {x:4200,y:550,w:1800,h:300},
-
-    // bridge area
-    {x:6400,y:500,w:1200,h:350},
-
-    // jump section
-    {x:8000,y:450,w:250,h:30},
-    {x:8400,y:350,w:250,h:30},
-    {x:8800,y:250,w:250,h:30},
-
-    // long runway
-    {x:9400,y:550,w:2500,h:300},
-
-    // boss arena
-    {x:12200,y:550,w:1500,h:300}
+    {x:6500,y:450,w:500,h:30},
+    {x:7200,y:350,w:500,h:30},
+    {x:8000,y:550,w:2500,h:300}
 ];
-
 
 
 
 // RINGS
 
-const rings = [];
+const ringList = [];
 
-for(let i=300;i<13500;i+=140){
+for(let i=300;i<10000;i+=150){
 
-    rings.push({
+    ringList.push({
 
         x:i,
-        y:300 + Math.sin(i*0.01)*80,
+        y:350 + Math.sin(i*0.01)*80,
 
         collected:false
     });
@@ -173,46 +121,33 @@ for(let i=300;i<13500;i+=140){
 
 
 
-
-// SPRINGS
-
-const springs = [
-
-    {x:2400,y:570,w:40,h:40},
-    {x:7200,y:450,w:40,h:40},
-    {x:10000,y:500,w:40,h:40}
-];
-
-
-
-
-// ENEMIES
-
-const enemies = [
-
-    {x:1800,y:450,w:50,h:50,dir:1},
-    {x:5000,y:500,w:50,h:50,dir:1},
-    {x:9500,y:500,w:50,h:50,dir:1}
-];
-
-
-
-
-// BACKGROUND
+// DRAW BACKGROUND
 
 function drawBackground(){
 
-    // mountains
-    ctx.fillStyle = "#4db06d";
+    ctx.fillStyle = "#6ec6ff";
 
-    for(let i=0;i<40;i++){
+    ctx.fillRect(
+        0,
+        0,
+        canvas.width,
+        canvas.height
+    );
+
+    // mountains
+    ctx.fillStyle = "#4caf50";
+
+    for(let i=0;i<30;i++){
 
         ctx.beginPath();
 
         ctx.arc(
+
             i*500 - cameraX*0.3,
             500,
+
             300,
+
             Math.PI,
             0
         );
@@ -221,7 +156,7 @@ function drawBackground(){
     }
 
     // water
-    ctx.fillStyle = "#2ca8ff";
+    ctx.fillStyle = "#2b9cff";
 
     ctx.fillRect(
         0,
@@ -233,29 +168,32 @@ function drawBackground(){
 
 
 
-
-// GROUND
+// DRAW GROUND
 
 function drawGround(){
 
-    ground.forEach(g=>{
+    level.forEach(g=>{
 
         // dirt
         ctx.fillStyle = "#9b5a2e";
 
         ctx.fillRect(
+
             g.x-cameraX,
             g.y,
+
             g.w,
             g.h
         );
 
         // grass
-        ctx.fillStyle = "#3cb043";
+        ctx.fillStyle = "#3bc93b";
 
         ctx.fillRect(
+
             g.x-cameraX,
             g.y,
+
             g.w,
             25
         );
@@ -268,8 +206,10 @@ function drawGround(){
             for(let y=25;y<g.h;y+=40){
 
                 ctx.strokeRect(
+
                     g.x-cameraX+x,
                     g.y+y,
+
                     40,
                     40
                 );
@@ -280,46 +220,7 @@ function drawGround(){
 
 
 
-
-// PALM TREES
-
-function drawTrees(){
-
-    for(let i=0;i<25;i++){
-
-        let x = i*700 + 300 - cameraX*0.9;
-
-        // trunk
-        ctx.fillStyle = "#8b4513";
-
-        ctx.fillRect(
-            x,
-            350,
-            20,
-            200
-        );
-
-        // leaves
-        ctx.fillStyle = "green";
-
-        ctx.beginPath();
-
-        ctx.arc(
-            x+10,
-            340,
-            50,
-            0,
-            Math.PI*2
-        );
-
-        ctx.fill();
-    }
-}
-
-
-
-
-// PLAYER
+// DRAW PLAYER
 
 function drawPlayer(){
 
@@ -327,7 +228,6 @@ function drawPlayer(){
 
     ctx.save();
 
-    // flip sprite
     if(player.vx < 0){
 
         ctx.scale(-1,1);
@@ -362,12 +262,11 @@ function drawPlayer(){
 
 
 
-
-// RINGS
+// DRAW RINGS
 
 function drawRings(){
 
-    rings.forEach(r=>{
+    ringList.forEach(r=>{
 
         if(!r.collected){
 
@@ -377,9 +276,12 @@ function drawRings(){
             ctx.beginPath();
 
             ctx.arc(
+
                 r.x-cameraX,
                 r.y,
+
                 15,
+
                 0,
                 Math.PI*2
             );
@@ -391,9 +293,11 @@ function drawRings(){
 
 
 
+// COLLECT RINGS
+
 function collectRings(){
 
-    rings.forEach(r=>{
+    ringList.forEach(r=>{
 
         if(!r.collected){
 
@@ -402,13 +306,13 @@ function collectRings(){
 
             let dist = Math.sqrt(dx*dx + dy*dy);
 
-            if(dist < 50){
+            if(dist < 60){
 
                 r.collected = true;
 
-                ringCount++;
+                rings++;
 
-                document.getElementById("rings").innerText = ringCount;
+                document.getElementById("rings").innerText = rings;
             }
         }
     });
@@ -416,131 +320,44 @@ function collectRings(){
 
 
 
-
-// SPRINGS
-
-function drawSprings(){
-
-    springs.forEach(s=>{
-
-        ctx.fillStyle = "red";
-
-        ctx.fillRect(
-            s.x-cameraX,
-            s.y,
-            s.w,
-            s.h
-        );
-
-        if(
-
-            player.x < s.x + s.w &&
-            player.x + player.width > s.x &&
-
-            player.y < s.y + s.h &&
-            player.y + player.height > s.y
-        ){
-
-            player.vy = -28;
-        }
-    });
-}
-
-
-
-
-// ENEMIES
-
-function drawEnemies(){
-
-    enemies.forEach(e=>{
-
-        ctx.fillStyle = "purple";
-
-        ctx.fillRect(
-            e.x-cameraX,
-            e.y,
-            e.w,
-            e.h
-        );
-
-        e.x += e.dir * 2;
-
-        if(Math.random() < 0.01){
-
-            e.dir *= -1;
-        }
-
-        if(
-
-            player.x < e.x + e.w &&
-            player.x + player.width > e.x &&
-
-            player.y < e.y + e.h &&
-            player.y + player.height > e.y
-        ){
-
-            respawn();
-        }
-    });
-}
-
-
-
-
-// RESPAWN
-
-function respawn(){
-
-    player.x = 100;
-    player.y = 300;
-
-    player.vx = 0;
-    player.vy = 0;
-
-    cameraX = 0;
-}
-
-
-
-
 // PHYSICS
 
 function physics(){
 
-    // movement
+    // move
     if(keys["ArrowRight"]){
 
-        player.vx += player.speed;
+        player.vx += 0.7;
     }
     else if(keys["ArrowLeft"]){
 
-        player.vx -= player.speed;
+        player.vx -= 0.7;
     }
     else{
 
         player.vx *= 0.90;
     }
 
-    // speed limit
-    if(player.vx > player.maxSpeed){
-        player.vx = player.maxSpeed;
+    // speed clamp
+    if(player.vx > 14){
+        player.vx = 14;
     }
 
-    if(player.vx < -player.maxSpeed){
-        player.vx = -player.maxSpeed;
+    if(player.vx < -14){
+        player.vx = -14;
     }
 
     player.x += player.vx;
 
     // gravity
     player.vy += gravity;
+
     player.y += player.vy;
 
     player.grounded = false;
 
     // collisions
-    ground.forEach(g=>{
+    level.forEach(g=>{
 
         if(
 
@@ -561,22 +378,29 @@ function physics(){
 
     // camera
     let targetCamera =
+
         player.x - canvas.width/2;
 
     cameraX +=
-        (targetCamera - cameraX) * 0.1;
+
+        (targetCamera-cameraX)*0.1;
 
     if(cameraX < 0){
         cameraX = 0;
     }
 
     // death
-    if(player.y > canvas.height + 400){
+    if(player.y > canvas.height + 500){
 
-        respawn();
+        player.x = 100;
+        player.y = 300;
+
+        player.vx = 0;
+        player.vy = 0;
+
+        cameraX = 0;
     }
 }
-
 
 
 
@@ -584,26 +408,13 @@ function physics(){
 
 function loop(){
 
-    ctx.clearRect(
-        0,
-        0,
-        canvas.width,
-        canvas.height
-    );
-
     drawBackground();
 
     drawGround();
 
-    drawTrees();
-
     drawRings();
 
     collectRings();
-
-    drawSprings();
-
-    drawEnemies();
 
     physics();
 

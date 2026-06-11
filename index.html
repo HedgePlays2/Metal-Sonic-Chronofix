@@ -211,6 +211,41 @@ let rings = 0;
 
 
 
+
+// =====================
+// GOAL SIGN
+// =====================
+
+function drawGoalSign(){
+
+    const screenX = goalSign.x - cameraX;
+
+    ctx.fillStyle = "#888";
+    ctx.fillRect(screenX, goalSign.y, 10, 120);
+
+    ctx.fillStyle = "gold";
+    ctx.fillRect(screenX - 25, goalSign.y + 20, 60, 40);
+
+    ctx.fillStyle = "black";
+    ctx.font = "20px Arial";
+    ctx.fillText("GOAL", screenX - 18, goalSign.y + 48);
+
+    if(
+        !levelComplete &&
+        player.x + player.width > goalSign.x &&
+        player.x < goalSign.x + goalSign.width &&
+        player.y + player.height > goalSign.y &&
+        player.y < goalSign.y + goalSign.height
+    ){
+        levelComplete = true;
+
+        setTimeout(()=>{
+            alert("GREEN HILL ACT CLEAR!\n\nTimeline Repaired: 12%");
+        },500);
+    }
+}
+
+
 // =====================
 // PLAYER
 // =====================
@@ -254,6 +289,20 @@ let respawnX = 100;
 let respawnY = 300;
 
 
+
+
+// =====================
+// GOAL SIGN
+// =====================
+
+const goalSign = {
+    x:11500,
+    y:430,
+    width:40,
+    height:120
+};
+
+let levelComplete = false;
 
 // =====================
 // INPUT
@@ -937,6 +986,8 @@ function loop(){
         drawSprings();
 
         drawCheckpoints();
+
+        drawGoalSign();
 
         drawEnemies();
 

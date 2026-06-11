@@ -1,4 +1,4 @@
-```html id="f9k2qm"
+```html id="9w2kaf"
 <!DOCTYPE html>
 <html>
 <head>
@@ -15,7 +15,7 @@ body{
 
 canvas{
     display:block;
-    background:black;
+    background:#6ec6ff;
     image-rendering:pixelated;
 }
 
@@ -65,8 +65,6 @@ canvas{
     font-size:26px;
 
     margin-top:20px;
-
-    text-shadow:2px 2px black;
 }
 
 #pressStart{
@@ -78,8 +76,6 @@ canvas{
     margin-top:60px;
 
     animation:blink 1s infinite;
-
-    text-shadow:2px 2px black;
 }
 
 @keyframes blink{
@@ -87,6 +83,25 @@ canvas{
     0%{opacity:1;}
     50%{opacity:0;}
     100%{opacity:1;}
+}
+
+#introText{
+
+    position:absolute;
+
+    width:100%;
+
+    top:40%;
+
+    text-align:center;
+
+    color:white;
+
+    font-size:42px;
+
+    display:none;
+
+    z-index:15;
 }
 
 #hud{
@@ -105,32 +120,11 @@ canvas{
     z-index:5;
 }
 
-#introText{
-
-    position:absolute;
-
-    width:100%;
-
-    top:40%;
-
-    text-align:center;
-
-    color:white;
-
-    font-size:42px;
-
-    text-shadow:3px 3px black;
-
-    z-index:15;
-
-    display:none;
-}
-
 </style>
 </head>
 <body>
 
-<!-- TITLE SCREEN -->
+<!-- TITLE -->
 
 <div id="titleScreen">
 
@@ -182,17 +176,17 @@ ctx.imageSmoothingEnabled = false;
 
 
 
-// ====================
+// =====================
 // GAME STATE
-// ====================
+// =====================
 
 let gameState = "title";
 
 
 
-// ====================
+// =====================
 // SPRITES
-// ====================
+// =====================
 
 const idleSprite = new Image();
 idleSprite.src = "idle.png";
@@ -202,25 +196,25 @@ springSprite.src = "spring.png";
 
 
 
-// ====================
+// =====================
 // CAMERA
-// ====================
+// =====================
 
 let cameraX = 0;
 
 
 
-// ====================
+// =====================
 // RINGS
-// ====================
+// =====================
 
 let rings = 0;
 
 
 
-// ====================
+// =====================
 // PLAYER
-// ====================
+// =====================
 
 const player = {
 
@@ -238,21 +232,21 @@ const player = {
 
 
 
-// ====================
+// =====================
 // CHECKPOINTS
-// ====================
+// =====================
 
 const checkpoints = [
 
     {
-        x:3000,
-        y:420,
+        x:2200,
+        y:430,
         active:false
     },
 
     {
-        x:8500,
-        y:420,
+        x:7200,
+        y:430,
         active:false
     }
 ];
@@ -262,9 +256,9 @@ let respawnY = 300;
 
 
 
-// ====================
+// =====================
 // INPUT
-// ====================
+// =====================
 
 const keys = {};
 
@@ -272,7 +266,7 @@ document.addEventListener("keydown", e=>{
 
     keys[e.code] = true;
 
-    // START GAME
+    // start
     if(e.code === "Space" && gameState === "title"){
 
         document
@@ -282,7 +276,7 @@ document.addEventListener("keydown", e=>{
         startIntro();
     }
 
-    // JUMP
+    // jump
     if(e.code === "Space" && gameState === "game"){
 
         if(player.grounded){
@@ -299,9 +293,9 @@ document.addEventListener("keyup", e=>{
 
 
 
-// ====================
+// =====================
 // INTRO
-// ====================
+// =====================
 
 function startIntro(){
 
@@ -317,7 +311,6 @@ function startIntro(){
         "NO ONE COULD KILL SONIC.",
         "UNTIL HIM.",
         "THE TIMELINE COLLAPSED.",
-        "REALITY BEGAN TO BREAK.",
         "ONLY METAL SONIC SURVIVED."
     ];
 
@@ -347,55 +340,87 @@ function startIntro(){
 
 
 
-// ====================
+// =====================
 // LEVEL
-// ====================
+// =====================
 
 const level = [
 
-    {x:0,y:550,w:1800,h:300},
+    {x:0,y:550,w:2500,h:300},
 
-    {x:2100,y:500,w:700,h:350},
+    {x:2600,y:500,w:600,h:350},
 
-    {x:3200,y:450,w:600,h:400},
+    {x:3400,y:550,w:1400,h:300},
 
-    {x:4300,y:550,w:1800,h:300},
+    {x:5000,y:420,w:500,h:40},
 
-    {x:6700,y:450,w:500,h:30},
+    {x:5700,y:550,w:3000,h:300},
 
-    {x:7400,y:350,w:500,h:30},
+    {x:7600,y:350,w:700,h:40},
 
-    {x:8200,y:550,w:2500,h:300},
-
-    {x:11100,y:450,w:600,h:30},
-
-    {x:12000,y:550,w:1600,h:300}
+    {x:8500,y:550,w:3500,h:300}
 ];
 
 
 
-// ====================
+
+// =====================
+// ENEMIES
+// =====================
+
+const enemies = [
+
+    {
+        x:1400,
+        y:500,
+        width:60,
+        height:60,
+        dir:1
+    },
+
+    {
+        x:4200,
+        y:500,
+        width:60,
+        height:60,
+        dir:-1
+    },
+
+    {
+        x:6900,
+        y:500,
+        width:60,
+        height:60,
+        dir:1
+    }
+];
+
+
+
+
+// =====================
 // SPRINGS
-// ====================
+// =====================
 
 const springs = [
 
     {x:1800,y:486,w:64,h:64},
 
-    {x:5200,y:486,w:64,h:64},
+    {x:5200,y:356,w:64,h:64},
 
     {x:7600,y:286,w:64,h:64}
 ];
 
 
 
-// ====================
+
+// =====================
 // RINGS
-// ====================
+// =====================
 
 const ringList = [];
 
-for(let i=300;i<13000;i+=150){
+for(let i=300;i<11000;i+=150){
 
     ringList.push({
 
@@ -409,9 +434,9 @@ for(let i=300;i<13000;i+=150){
 
 
 
-// ====================
+// =====================
 // BACKGROUND
-// ====================
+// =====================
 
 function drawBackground(){
 
@@ -427,7 +452,7 @@ function drawBackground(){
     // mountains
     ctx.fillStyle = "#4caf50";
 
-    for(let i=0;i<30;i++){
+    for(let i=0;i<25;i++){
 
         ctx.beginPath();
 
@@ -450,18 +475,18 @@ function drawBackground(){
 
     ctx.fillRect(
         0,
-        canvas.height-120,
+        canvas.height-60,
         canvas.width,
-        120
+        60
     );
 }
 
 
 
 
-// ====================
+// =====================
 // GROUND
-// ====================
+// =====================
 
 function drawGround(){
 
@@ -491,7 +516,7 @@ function drawGround(){
             25
         );
 
-        // checker pattern
+        // checker
         ctx.strokeStyle = "#7a431f";
 
         for(let x=0;x<g.w;x+=40){
@@ -514,9 +539,90 @@ function drawGround(){
 
 
 
-// ====================
+// =====================
+// ENEMIES
+// =====================
+
+function drawEnemies(){
+
+    enemies.forEach(e=>{
+
+        e.x += e.dir * 2;
+
+        if(e.x < 1000 || e.x > 9000){
+
+            e.dir *= -1;
+        }
+
+        // body
+        ctx.fillStyle = "red";
+
+        ctx.fillRect(
+
+            e.x-cameraX,
+            e.y,
+
+            e.width,
+            e.height
+        );
+
+        // eyes
+        ctx.fillStyle = "black";
+
+        ctx.fillRect(
+
+            e.x-cameraX+10,
+            e.y+15,
+
+            10,
+            10
+        );
+
+        ctx.fillRect(
+
+            e.x-cameraX+40,
+            e.y+15,
+
+            10,
+            10
+        );
+
+        // collision
+        if(
+
+            player.x + player.width > e.x &&
+            player.x < e.x + e.width &&
+
+            player.y + player.height > e.y &&
+            player.y < e.y + e.height
+        ){
+
+            // stomp
+            if(player.vy > 0){
+
+                e.y = 99999;
+
+                player.vy = -15;
+            }
+            else{
+
+                // hurt player
+                player.x = respawnX;
+                player.y = respawnY;
+
+                player.vx = 0;
+                player.vy = 0;
+            }
+        }
+    });
+}
+
+
+
+
+// =====================
 // SPRINGS
-// ====================
+// =====================
 
 function drawSprings(){
 
@@ -533,7 +639,6 @@ function drawSprings(){
             s.h
         );
 
-        // bounce
         if(
 
             player.x + player.width > s.x &&
@@ -551,15 +656,14 @@ function drawSprings(){
 
 
 
-// ====================
+// =====================
 // CHECKPOINTS
-// ====================
+// =====================
 
 function drawCheckpoints(){
 
     checkpoints.forEach(c=>{
 
-        // pole
         ctx.fillStyle = "silver";
 
         ctx.fillRect(
@@ -571,7 +675,6 @@ function drawCheckpoints(){
             120
         );
 
-        // orb
         ctx.fillStyle =
             c.active ? "lime" : "red";
 
@@ -590,7 +693,6 @@ function drawCheckpoints(){
 
         ctx.fill();
 
-        // activate
         if(
 
             player.x + player.width > c.x &&
@@ -611,9 +713,9 @@ function drawCheckpoints(){
 
 
 
-// ====================
+// =====================
 // PLAYER
-// ====================
+// =====================
 
 function drawPlayer(){
 
@@ -656,9 +758,9 @@ function drawPlayer(){
 
 
 
-// ====================
+// =====================
 // RINGS
-// ====================
+// =====================
 
 function drawRings(){
 
@@ -691,9 +793,9 @@ function drawRings(){
 
 
 
-// ====================
+// =====================
 // COLLECT RINGS
-// ====================
+// =====================
 
 function collectRings(){
 
@@ -723,9 +825,9 @@ function collectRings(){
 
 
 
-// ====================
+// =====================
 // PHYSICS
-// ====================
+// =====================
 
 function physics(){
 
@@ -743,7 +845,7 @@ function physics(){
         player.vx *= 0.90;
     }
 
-    // speed cap
+    // cap
     if(player.vx > 14){
         player.vx = 14;
     }
@@ -752,13 +854,11 @@ function physics(){
         player.vx = -14;
     }
 
-    // move X
     player.x += player.vx;
 
     // gravity
     player.vy += 0.8;
 
-    // move Y
     player.y += player.vy;
 
     player.grounded = false;
@@ -821,9 +921,9 @@ function physics(){
 
 
 
-// ====================
-// GAME LOOP
-// ====================
+// =====================
+// LOOP
+// =====================
 
 function loop(){
 
@@ -838,6 +938,8 @@ function loop(){
         drawSprings();
 
         drawCheckpoints();
+
+        drawEnemies();
 
         collectRings();
 

@@ -2,4 +2,6 @@ A sonic the hedgehog fan game that : stars metal sonic traving back in time to f
 
 
 *⚡ Metal Sonic: ChronoFix — Full Game Explanation Metal Sonic: ChronoFix is a Sonic fangame where Metal Sonic becomes the protagonist, forced to travel through time to stop a catastrophic future created by a new villain: Metal Hedge, a deadly alternate‑universe counterpart who actually succeeded in killing his world’s Sonic.
+
+
 *⭐ Core Premise Metal Hedge destroys his entire universe, something Eggman failed to do for 35 years. The destruction creates a temporal shockwave that threatens every timeline, including the main Sonic universe. Metal Sonic is the only one fast and durable enough to survive the collapse, so he must: Chase Metal Hedge across multiple eras Repair broken timelines Prevent the multiverse from collapsing This turns Metal Sonic into a reluctant hero — not because he wants to save Sonic, but because he wants to survive.

@@ -2,164 +2,36 @@
 <html>
 <head>
 <title>Metal Sonic: Chrono Fix</title>
-
 <style>
-
-body{
-    margin:0;
-    overflow:hidden;
-    background:black;
-    font-family:Arial;
+body {
+    margin: 0;
+    overflow: hidden;
+    background: #55c9ff;
 }
 
-canvas{
-    display:block;
-    background:#6ec6ff;
-    image-rendering:pixelated;
+canvas {
+    display: block;
+    background: linear-gradient(#55c9ff, #8ee36b);
 }
 
-#titleScreen{
-
-    position:absolute;
-
-    width:100%;
-    height:100%;
-
-    background:
-    linear-gradient(
-        to bottom,
-        #000000,
-        #001122,
-        #003366
-    );
-
-    display:flex;
-
-    flex-direction:column;
-
-    justify-content:center;
-    align-items:center;
-
-    z-index:20;
+#hud {
+    position: absolute;
+    top: 15px;
+    left: 15px;
+    color: white;
+    font-family: Arial;
+    font-size: 24px;
+    text-shadow: 2px 2px #000;
 }
-
-#gameTitle{
-
-    color:#7ee7ff;
-
-    font-size:80px;
-
-    text-align:center;
-
-    text-shadow:
-    0 0 10px cyan,
-    0 0 20px cyan,
-    0 0 40px cyan;
-}
-
-#subtitle{
-
-    color:white;
-
-    font-size:26px;
-
-    margin-top:20px;
-}
-
-#pressStart{
-
-    color:yellow;
-
-    font-size:36px;
-
-    margin-top:60px;
-
-    animation:blink 1s infinite;
-}
-
-@keyframes blink{
-
-    0%{opacity:1;}
-    50%{opacity:0;}
-    100%{opacity:1;}
-}
-
-#introText{
-
-    position:absolute;
-
-    width:100%;
-
-    top:40%;
-
-    text-align:center;
-
-    color:white;
-
-    font-size:42px;
-
-    display:none;
-
-    z-index:15;
-}
-
-#hud{
-
-    position:absolute;
-
-    top:10px;
-    left:10px;
-
-    color:white;
-
-    font-size:32px;
-
-    text-shadow:3px 3px black;
-
-    z-index:5;
-}
-
 </style>
 </head>
+
 <body>
 
-<!-- TITLE -->
-
-<div id="titleScreen">
-
-    <div id="gameTitle">
-        METAL SONIC<br>
-        CHRONO FIX
-    </div>
-
-    <div id="subtitle">
-        A Sonic Fangame
-    </div>
-
-    <div id="pressStart">
-        PRESS SPACE
-    </div>
-
-</div>
-
-
-
-<!-- INTRO -->
-
-<div id="introText"></div>
-
-
-
-<!-- HUD -->
-
 <div id="hud">
-GREEN HILL — CHRONO FRACTURE<br>
-RINGS: <span id="rings">0</span>
+Metal Sonic: Chrono Fix<br>
+Rings: <span id="rings">0</span>
 </div>
-
-
-
-<!-- GAME -->
 
 <canvas id="game"></canvas>
 
@@ -171,837 +43,246 @@ const ctx = canvas.getContext("2d");
 canvas.width = window.innerWidth;
 canvas.height = window.innerHeight;
 
-ctx.imageSmoothingEnabled = false;
 
-
-
-// =====================
-// GAME STATE
-// =====================
-
-let gameState = "title";
-
-
-
-// =====================
-// SPRITES
-// =====================
-
-const idleSprite = new Image();
-idleSprite.src = "idle.png";
-
-const springSprite = new Image();
-springSprite.src = "spring.png";
-
-
-
-// =====================
-// CAMERA
-// =====================
-
-let cameraX = 0;
-
-
-
-// =====================
-// RINGS
-// =====================
-
-let rings = 0;
-
-
-
-
-// =====================
-// GOAL SIGN
-// =====================
-
-function drawGoalSign(){
-
-    const screenX = goalSign.x - cameraX;
-
-    ctx.fillStyle = "#888";
-    ctx.fillRect(screenX, goalSign.y, 10, 120);
-
-    ctx.fillStyle = "gold";
-    ctx.fillRect(screenX - 25, goalSign.y + 20, 60, 40);
-
-    ctx.fillStyle = "black";
-    ctx.font = "20px Arial";
-    ctx.fillText("GOAL", screenX - 18, goalSign.y + 48);
-
-    if(
-        !levelComplete &&
-        player.x + player.width > goalSign.x &&
-        player.x < goalSign.x + goalSign.width &&
-        player.y + player.height > goalSign.y &&
-        player.y < goalSign.y + goalSign.height
-    ){
-        levelComplete = true;
-
-        setTimeout(()=>{
-            alert("GREEN HILL ACT CLEAR!\n\nTimeline Repaired: 12%");
-        },500);
-    }
-}
-
-
-// =====================
 // PLAYER
-// =====================
 
-const player = {
+let player = {
+    x: 200,
+    y: 300,
+    width: 40,
+    height: 50,
 
-    x:100,
-    y:300,
+    vx: 0,
+    vy: 0,
 
-    width:64,
-    height:96,
-
-    vx:0,
-    vy:0,
+    speed: 0.7,
+    maxSpeed: 8,
+    jump: -14,
 
     grounded:false
 };
 
 
+// CAMERA
 
-// =====================
-// CHECKPOINTS
-// =====================
-
-const checkpoints = [
-
-    {
-        x:2200,
-        y:430,
-        active:false
-    },
-
-    {
-        x:7200,
-        y:430,
-        active:false
-    }
-];
-
-let respawnX = 100;
-let respawnY = 300;
-
-
-
-
-// =====================
-// GOAL SIGN
-// =====================
-
-const goalSign = {
-    x:11500,
-    y:430,
-    width:40,
-    height:120
+let camera = {
+    x:0
 };
 
-let levelComplete = false;
 
-// =====================
+// LEVEL
+
+let level = {
+    width:5000,
+    ground:450
+};
+
+
 // INPUT
-// =====================
 
-const keys = {};
+let keys={};
 
 document.addEventListener("keydown", e=>{
-
-    keys[e.code] = true;
-
-    // start
-    if(e.code === "Space" && gameState === "title"){
-
-        document
-        .getElementById("titleScreen")
-        .style.display = "none";
-
-        startIntro();
-    }
-
-    // jump
-    if(e.code === "Space" && gameState === "game"){
-
-        if(player.grounded){
-
-            player.vy = -18;
-        }
-    }
+    keys[e.key]=true;
 });
 
 document.addEventListener("keyup", e=>{
-
-    keys[e.code] = false;
+    keys[e.key]=false;
 });
 
 
-
-// =====================
-// INTRO
-// =====================
-
-function startIntro(){
-
-    gameState = "intro";
-
-    const intro = document.getElementById("introText");
-
-    intro.style.display = "block";
-
-    const lines = [
-
-        "35 YEARS.",
-        "NO ONE COULD KILL SONIC.",
-        "UNTIL HIM.",
-        "THE TIMELINE COLLAPSED.",
-        "ONLY METAL SONIC SURVIVED."
-    ];
-
-    let index = 0;
-
-    function nextLine(){
-
-        if(index < lines.length){
-
-            intro.innerText = lines[index];
-
-            index++;
-
-            setTimeout(nextLine,2000);
-        }
-        else{
-
-            intro.style.display = "none";
-
-            gameState = "game";
-        }
-    }
-
-    nextLine();
-}
-
-
-
-
-// =====================
-// LEVEL
-// =====================
-
-const level = [
-
-    {x:0,y:550,w:2500,h:300},
-
-    {x:2600,y:500,w:600,h:350},
-
-    {x:3400,y:550,w:1400,h:300},
-
-    {x:5000,y:420,w:500,h:40},
-
-    {x:5700,y:550,w:3000,h:300},
-
-    {x:7600,y:350,w:700,h:40},
-
-    {x:8500,y:550,w:3500,h:300}
-];
-
-
-
-
-// =====================
-// ENEMIES
-// =====================
-
-const enemies = [
-
-    {
-        x:1400,
-        y:500,
-        width:60,
-        height:60,
-        dir:1
-    },
-
-    {
-        x:4200,
-        y:500,
-        width:60,
-        height:60,
-        dir:-1
-    },
-
-    {
-        x:6900,
-        y:500,
-        width:60,
-        height:60,
-        dir:1
-    }
-];
-
-
-
-
-// =====================
-// SPRINGS
-// =====================
-
-const springs = [
-
-    {x:1800,y:486,w:64,h:64},
-
-    {x:5200,y:356,w:64,h:64},
-
-    {x:7600,y:286,w:64,h:64}
-];
-
-
-
-
-// =====================
-// RINGS
-// =====================
-
-const ringList = [];
-
-for(let i=300;i<11000;i+=150){
-
-    ringList.push({
-
-        x:i,
-        y:350 + Math.sin(i*0.01)*80,
-
-        collected:false
-    });
-}
-
-
-
-
-// =====================
-// BACKGROUND
-// =====================
-
-function drawBackground(){
-
-    ctx.fillStyle = "#6ec6ff";
-
-    ctx.fillRect(
-        0,
-        0,
-        canvas.width,
-        canvas.height
-    );
-
-    // mountains
-    ctx.fillStyle = "#4caf50";
-
-    for(let i=0;i<25;i++){
-
-        ctx.beginPath();
-
-        ctx.arc(
-
-            i*500 - cameraX*0.3,
-            500,
-
-            300,
-
-            Math.PI,
-            0
-        );
-
-        ctx.fill();
-    }
-
-    // water
-    ctx.fillStyle = "#2b9cff";
-
-    ctx.fillRect(
-        0,
-        canvas.height-60,
-        canvas.width,
-        60
-    );
-}
-
-
-
-
-// =====================
-// GROUND
-// =====================
-
-function drawGround(){
-
-    level.forEach(g=>{
-
-        // dirt
-        ctx.fillStyle = "#9b5a2e";
-
-        ctx.fillRect(
-
-            g.x-cameraX,
-            g.y,
-
-            g.w,
-            g.h
-        );
-
-        // grass
-        ctx.fillStyle = "#3bc93b";
-
-        ctx.fillRect(
-
-            g.x-cameraX,
-            g.y,
-
-            g.w,
-            25
-        );
-
-        // checker
-        ctx.strokeStyle = "#7a431f";
-
-        for(let x=0;x<g.w;x+=40){
-
-            for(let y=25;y<g.h;y+=40){
-
-                ctx.strokeRect(
-
-                    g.x-cameraX+x,
-                    g.y+y,
-
-                    40,
-                    40
-                );
-            }
-        }
-    });
-}
-
-
-
-
-// =====================
-// ENEMIES
-// =====================
-
-function drawEnemies(){
-
-    enemies.forEach(e=>{
-
-        e.x += e.dir * 2;
-
-        if(e.x < 1000 || e.x > 9000){
-
-            e.dir *= -1;
-        }
-
-        // body
-        ctx.fillStyle = "red";
-
-        ctx.fillRect(
-
-            e.x-cameraX,
-            e.y,
-
-            e.width,
-            e.height
-        );
-
-        // eyes
-        ctx.fillStyle = "black";
-
-        ctx.fillRect(
-
-            e.x-cameraX+10,
-            e.y+15,
-
-            10,
-            10
-        );
-
-        ctx.fillRect(
-
-            e.x-cameraX+40,
-            e.y+15,
-
-            10,
-            10
-        );
-
-        // collision
-        if(
-
-            player.x + player.width > e.x &&
-            player.x < e.x + e.width &&
-
-            player.y + player.height > e.y &&
-            player.y < e.y + e.height
-        ){
-
-            // stomp
-            if(player.vy > 0){
-
-                e.y = 99999;
-
-                player.vy = -15;
-            }
-            else{
-
-                // hurt player
-                player.x = respawnX;
-                player.y = respawnY;
-
-                player.vx = 0;
-                player.vy = 0;
-            }
-        }
-    });
-}
-
-
-
-
-// =====================
-// SPRINGS
-// =====================
-
-function drawSprings(){
-
-    springs.forEach(s=>{
-
-        ctx.drawImage(
-
-            springSprite,
-
-            s.x-cameraX,
-            s.y,
-
-            s.w,
-            s.h
-        );
-
-        if(
-
-            player.x + player.width > s.x &&
-            player.x < s.x + s.w &&
-
-            player.y + player.height > s.y &&
-            player.y < s.y + s.h
-        ){
-
-            player.vy = -30;
-        }
-    });
-}
-
-
-
-
-// =====================
-// CHECKPOINTS
-// =====================
-
-function drawCheckpoints(){
-
-    checkpoints.forEach(c=>{
-
-        ctx.fillStyle = "silver";
-
-        ctx.fillRect(
-
-            c.x-cameraX,
-            c.y,
-
-            12,
-            120
-        );
-
-        ctx.fillStyle =
-            c.active ? "lime" : "red";
-
-        ctx.beginPath();
-
-        ctx.arc(
-
-            c.x-cameraX + 6,
-            c.y,
-
-            20,
-
-            0,
-            Math.PI*2
-        );
-
-        ctx.fill();
-
-        if(
-
-            player.x + player.width > c.x &&
-            player.x < c.x + 20 &&
-
-            player.y + player.height > c.y &&
-            player.y < c.y + 120
-        ){
-
-            c.active = true;
-
-            respawnX = c.x;
-            respawnY = c.y - 120;
-        }
-    });
-}
-
-
-
-
-// =====================
-// PLAYER
-// =====================
-
-function drawPlayer(){
-
-    const screenX = player.x - cameraX;
-
-    ctx.save();
-
-    if(player.vx < 0){
-
-        ctx.scale(-1,1);
-
-        ctx.drawImage(
-
-            idleSprite,
-
-            -screenX - 64,
-            player.y,
-
-            64,
-            96
-        );
-    }
-    else{
-
-        ctx.drawImage(
-
-            idleSprite,
-
-            screenX,
-            player.y,
-
-            64,
-            96
-        );
-    }
-
-    ctx.restore();
-}
-
-
-
-
-// =====================
-// RINGS
-// =====================
-
-function drawRings(){
-
-    ringList.forEach(r=>{
-
-        if(!r.collected){
-
-            ctx.strokeStyle = "gold";
-
-            ctx.lineWidth = 5;
-
-            ctx.beginPath();
-
-            ctx.arc(
-
-                r.x-cameraX,
-                r.y,
-
-                15,
-
-                0,
-                Math.PI*2
-            );
-
-            ctx.stroke();
-        }
-    });
-}
-
-
-
-
-// =====================
-// COLLECT RINGS
-// =====================
-
-function collectRings(){
-
-    ringList.forEach(r=>{
-
-        if(!r.collected){
-
-            let dx = r.x - player.x;
-            let dy = r.y - player.y;
-
-            let dist = Math.sqrt(dx*dx + dy*dy);
-
-            if(dist < 60){
-
-                r.collected = true;
-
-                rings++;
-
-                document
-                .getElementById("rings")
-                .innerText = rings;
-            }
-        }
-    });
-}
-
-
-
-
-// =====================
 // PHYSICS
-// =====================
 
-function physics(){
+function update(){
 
-    // move
+    // movement
+
     if(keys["ArrowRight"]){
-
-        player.vx += 0.7;
-    }
-    else if(keys["ArrowLeft"]){
-
-        player.vx -= 0.7;
-    }
-    else{
-
-        player.vx *= 0.90;
+        player.vx += player.speed;
     }
 
-    // cap
-    if(player.vx > 14){
-        player.vx = 14;
+    if(keys["ArrowLeft"]){
+        player.vx -= player.speed;
     }
 
-    if(player.vx < -14){
-        player.vx = -14;
+
+    // friction
+
+    player.vx *= 0.85;
+
+
+    // limit speed
+
+    if(player.vx > player.maxSpeed)
+        player.vx = player.maxSpeed;
+
+    if(player.vx < -player.maxSpeed)
+        player.vx = -player.maxSpeed;
+
+
+
+    // jump
+
+    if(keys[" "] && player.grounded){
+
+        player.vy = player.jump;
+        player.grounded=false;
+
     }
 
-    player.x += player.vx;
+
 
     // gravity
-    player.vy += 0.8;
 
+    player.vy += 0.7;
+
+
+    player.x += player.vx;
     player.y += player.vy;
 
-    player.grounded = false;
 
-    // collisions
-    level.forEach(g=>{
 
-        if(
+    // ground collision
 
-            player.x + player.width > g.x &&
-            player.x < g.x + g.w &&
+    if(player.y + player.height >= level.ground){
 
-            player.y + player.height > g.y &&
-            player.y + player.height < g.y + 40 &&
+        player.y = level.ground-player.height;
 
-            player.vy >= 0
-        ){
+        player.vy=0;
+        player.grounded=true;
 
-            player.y = g.y - player.height;
-
-            player.vy = 0;
-
-            player.grounded = true;
-        }
-    });
-
-    // camera
-    let targetCamera =
-
-        player.x - canvas.width/2;
-
-    cameraX +=
-
-        (targetCamera-cameraX)*0.1;
-
-    if(cameraX < 0){
-
-        cameraX = 0;
     }
+
+
 
     // death
-    if(player.y > 1200){
 
-        player.x = respawnX;
-        player.y = respawnY;
+    if(player.y > canvas.height){
 
-        player.vx = 0;
-        player.vy = 0;
+        player.x=200;
+        player.y=200;
 
-        cameraX =
-            respawnX - canvas.width/2;
-
-        if(cameraX < 0){
-
-            cameraX = 0;
-        }
+        player.vx=0;
+        player.vy=0;
     }
+
+
+
+    // camera follow
+
+    camera.x = player.x - 300;
+
+
+    if(camera.x < 0)
+        camera.x=0;
+
+
+    if(camera.x > level.width-canvas.width)
+        camera.x=level.width-canvas.width;
+
+}
+
+
+// DRAW
+
+function draw(){
+
+ctx.clearRect(0,0,canvas.width,canvas.height);
+
+
+// level
+
+ctx.fillStyle="#35b52a";
+
+ctx.fillRect(
+    -camera.x,
+    level.ground,
+    level.width,
+    canvas.height
+);
+
+
+// ground details
+
+for(let i=0;i<level.width;i+=100){
+
+ctx.fillStyle="#228b22";
+
+ctx.fillRect(
+    i-camera.x,
+    level.ground,
+    50,
+    20
+);
+
 }
 
 
 
+// goal sign
 
-// =====================
+ctx.fillStyle="white";
+
+ctx.fillRect(
+    4700-camera.x,
+    level.ground-120,
+    10,
+    120
+);
+
+ctx.fillStyle="red";
+
+ctx.fillRect(
+    4660-camera.x,
+    level.ground-120,
+    90,
+    50
+);
+
+
+
+
+// player
+
+ctx.fillStyle="#4b4bff";
+
+ctx.fillRect(
+player.x-camera.x,
+player.y,
+player.width,
+player.height
+);
+
+
+// visor
+
+ctx.fillStyle="#00ffff";
+
+ctx.fillRect(
+player.x-camera.x+8,
+player.y+10,
+25,
+10
+);
+
+
+}
+
+
 // LOOP
-// =====================
 
-function loop(){
+function gameLoop(){
 
-    if(gameState === "game"){
+update();
 
-        drawBackground();
+draw();
 
-        drawGround();
+requestAnimationFrame(gameLoop);
 
-        drawRings();
-
-        drawSprings();
-
-        drawCheckpoints();
-
-        drawGoalSign();
-
-        drawEnemies();
-
-        collectRings();
-
-        physics();
-
-        drawPlayer();
-    }
-
-    requestAnimationFrame(loop);
 }
 
-loop();
+gameLoop();
+
 
 </script>
 

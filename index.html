@@ -2,6 +2,7 @@
 <html>
 <head>
 <title>Metal Sonic: Chrono Fix</title>
+
 <style>
 body {
     margin: 0;
@@ -11,7 +12,6 @@ body {
 
 canvas {
     display: block;
-    background: linear-gradient(#55c9ff, #8ee36b);
 }
 
 #hud {
@@ -21,9 +21,10 @@ canvas {
     color: white;
     font-family: Arial;
     font-size: 24px;
-    text-shadow: 2px 2px #000;
+    text-shadow: 2px 2px black;
 }
 </style>
+
 </head>
 
 <body>
@@ -35,6 +36,7 @@ Rings: <span id="rings">0</span>
 
 <canvas id="game"></canvas>
 
+
 <script>
 
 const canvas = document.getElementById("game");
@@ -44,20 +46,35 @@ canvas.width = window.innerWidth;
 canvas.height = window.innerHeight;
 
 
+// SPRITES
+
+const metalIdle = new Image();
+metalIdle.src = "sprites/metal/idle.png";
+
+const metalRun = new Image();
+metalRun.src = "sprites/metal/run.png";
+
+const metalJump = new Image();
+metalJump.src = "sprites/metal/jump.png";
+
+
 // PLAYER
 
 let player = {
-    x: 200,
-    y: 300,
-    width: 40,
-    height: 50,
 
-    vx: 0,
-    vy: 0,
+    x:200,
+    y:300,
 
-    speed: 0.7,
-    maxSpeed: 8,
-    jump: -14,
+    width:60,
+    height:70,
+
+    vx:0,
+    vy:0,
+
+    speed:0.8,
+    maxSpeed:8,
+
+    jumpPower:-15,
 
     grounded:false
 };
@@ -73,8 +90,10 @@ let camera = {
 // LEVEL
 
 let level = {
+
     width:5000,
     ground:450
+
 };
 
 
@@ -82,24 +101,28 @@ let level = {
 
 let keys={};
 
+
 document.addEventListener("keydown", e=>{
     keys[e.key]=true;
 });
+
 
 document.addEventListener("keyup", e=>{
     keys[e.key]=false;
 });
 
 
-// PHYSICS
+// UPDATE
 
 function update(){
+
 
     // movement
 
     if(keys["ArrowRight"]){
         player.vx += player.speed;
     }
+
 
     if(keys["ArrowLeft"]){
         player.vx -= player.speed;
@@ -111,10 +134,10 @@ function update(){
     player.vx *= 0.85;
 
 
-    // limit speed
 
     if(player.vx > player.maxSpeed)
         player.vx = player.maxSpeed;
+
 
     if(player.vx < -player.maxSpeed)
         player.vx = -player.maxSpeed;
@@ -125,7 +148,7 @@ function update(){
 
     if(keys[" "] && player.grounded){
 
-        player.vy = player.jump;
+        player.vy = player.jumpPower;
         player.grounded=false;
 
     }
@@ -142,20 +165,21 @@ function update(){
 
 
 
-    // ground collision
+    // ground
 
     if(player.y + player.height >= level.ground){
 
         player.y = level.ground-player.height;
 
         player.vy=0;
+
         player.grounded=true;
 
     }
 
 
 
-    // death
+    // death reset
 
     if(player.y > canvas.height){
 
@@ -164,11 +188,12 @@ function update(){
 
         player.vx=0;
         player.vy=0;
+
     }
 
 
 
-    // camera follow
+    // camera
 
     camera.x = player.x - 300;
 
@@ -183,6 +208,7 @@ function update(){
 }
 
 
+
 // DRAW
 
 function draw(){
@@ -190,7 +216,13 @@ function draw(){
 ctx.clearRect(0,0,canvas.width,canvas.height);
 
 
-// level
+// sky
+
+ctx.fillStyle="#55c9ff";
+ctx.fillRect(0,0,canvas.width,canvas.height);
+
+
+// grass
 
 ctx.fillStyle="#35b52a";
 
@@ -202,7 +234,7 @@ ctx.fillRect(
 );
 
 
-// ground details
+// ground pattern
 
 for(let i=0;i<level.width;i+=100){
 
@@ -218,8 +250,7 @@ ctx.fillRect(
 }
 
 
-
-// goal sign
+// goal
 
 ctx.fillStyle="white";
 
@@ -229,6 +260,7 @@ ctx.fillRect(
     10,
     120
 );
+
 
 ctx.fillStyle="red";
 
@@ -241,47 +273,60 @@ ctx.fillRect(
 
 
 
+// choose sprite
 
-// player
-
-ctx.fillStyle="#4b4bff";
-
-ctx.fillRect(
-player.x-camera.x,
-player.y,
-player.width,
-player.height
-);
+let sprite = metalIdle;
 
 
-// visor
+if(!player.grounded){
 
-ctx.fillStyle="#00ffff";
+    sprite = metalJump;
 
-ctx.fillRect(
-player.x-camera.x+8,
-player.y+10,
-25,
-10
+}
+
+else if(Math.abs(player.vx)>1){
+
+    sprite = metalRun;
+
+}
+
+
+
+// draw Metal Sonic
+
+ctx.drawImage(
+
+    sprite,
+
+    player.x-camera.x,
+
+    player.y,
+
+    player.width,
+
+    player.height
+
 );
 
 
 }
 
 
-// LOOP
 
-function gameLoop(){
+// GAME LOOP
+
+function loop(){
 
 update();
 
 draw();
 
-requestAnimationFrame(gameLoop);
+requestAnimationFrame(loop);
 
 }
 
-gameLoop();
+
+loop();
 
 
 </script>

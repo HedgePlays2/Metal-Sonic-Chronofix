@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head>
-<title>Metal Sonic: Chrono Fix</title>
+<title>Metal Sonic: ChronoFix</title>
 
 <style>
 body {
@@ -65,7 +65,8 @@ let player = {
     x:200,
     y:300,
 
-    width:60,
+    // collision size (not sprite size)
+    width:40,
     height:70,
 
     vx:0,
@@ -90,10 +91,8 @@ let camera = {
 // LEVEL
 
 let level = {
-
     width:5000,
     ground:450
-
 };
 
 
@@ -116,23 +115,16 @@ document.addEventListener("keyup", e=>{
 
 function update(){
 
-
-    // movement
-
     if(keys["ArrowRight"]){
         player.vx += player.speed;
     }
-
 
     if(keys["ArrowLeft"]){
         player.vx -= player.speed;
     }
 
 
-    // friction
-
     player.vx *= 0.85;
-
 
 
     if(player.vx > player.maxSpeed)
@@ -144,8 +136,6 @@ function update(){
 
 
 
-    // jump
-
     if(keys[" "] && player.grounded){
 
         player.vy = player.jumpPower;
@@ -155,8 +145,6 @@ function update(){
 
 
 
-    // gravity
-
     player.vy += 0.7;
 
 
@@ -165,27 +153,21 @@ function update(){
 
 
 
-    // ground
-
     if(player.y + player.height >= level.ground){
 
-        player.y = level.ground-player.height;
+        player.y = level.ground - player.height;
 
-        player.vy=0;
-
-        player.grounded=true;
+        player.vy = 0;
+        player.grounded = true;
 
     }
 
 
 
-    // death reset
-
     if(player.y > canvas.height){
 
         player.x=200;
         player.y=200;
-
         player.vx=0;
         player.vy=0;
 
@@ -193,17 +175,11 @@ function update(){
 
 
 
-    // camera
-
     camera.x = player.x - 300;
 
 
     if(camera.x < 0)
         camera.x=0;
-
-
-    if(camera.x > level.width-canvas.width)
-        camera.x=level.width-canvas.width;
 
 }
 
@@ -216,13 +192,13 @@ function draw(){
 ctx.clearRect(0,0,canvas.width,canvas.height);
 
 
-// sky
+// background
 
 ctx.fillStyle="#55c9ff";
 ctx.fillRect(0,0,canvas.width,canvas.height);
 
 
-// grass
+// ground
 
 ctx.fillStyle="#35b52a";
 
@@ -232,45 +208,6 @@ ctx.fillRect(
     level.width,
     canvas.height
 );
-
-
-// ground pattern
-
-for(let i=0;i<level.width;i+=100){
-
-ctx.fillStyle="#228b22";
-
-ctx.fillRect(
-    i-camera.x,
-    level.ground,
-    50,
-    20
-);
-
-}
-
-
-// goal
-
-ctx.fillStyle="white";
-
-ctx.fillRect(
-    4700-camera.x,
-    level.ground-120,
-    10,
-    120
-);
-
-
-ctx.fillStyle="red";
-
-ctx.fillRect(
-    4660-camera.x,
-    level.ground-120,
-    90,
-    50
-);
-
 
 
 // choose sprite
@@ -292,33 +229,37 @@ else if(Math.abs(player.vx)>1){
 
 
 
-// draw Metal Sonic
+// draw sprite without stretching
+
+let spriteWidth = sprite.width * 0.5;
+let spriteHeight = sprite.height * 0.5;
+
 
 ctx.drawImage(
 
     sprite,
 
-    player.x-camera.x,
+    player.x - camera.x - (spriteWidth-player.width)/2,
 
-    player.y,
+    player.y - (spriteHeight-player.height),
 
-    player.width,
+    spriteWidth,
 
-    player.height
+    spriteHeight
 
 );
+
 
 
 }
 
 
 
-// GAME LOOP
+// LOOP
 
 function loop(){
 
 update();
-
 draw();
 
 requestAnimationFrame(loop);
@@ -327,7 +268,6 @@ requestAnimationFrame(loop);
 
 
 loop();
-
 
 </script>
 

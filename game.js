@@ -19,10 +19,6 @@ const metalJump = new Image();
 metalJump.src = "sprites/metal/jump.png";
 
 
-const ringSprite = new Image();
-ringSprite.src = "sprites/rings/ring.png";
-
-
 // =====================
 // PLAYER
 // =====================
@@ -32,26 +28,26 @@ let player = {
     x: greenHill.spawn.x,
     y: greenHill.spawn.y,
 
-    width:40,
-    height:70,
+    // collision box
+    width: 28,
+    height: 48,
 
-    vx:0,
-    vy:0,
+    vx: 0,
+    vy: 0,
 
-    speed:0.8,
-    maxSpeed:8,
+    speed: 0.8,
+    maxSpeed: 8,
 
-    jumpPower:-15,
+    jumpPower: -15,
 
-    grounded:false
+    grounded: false
+
 };
 
 
 // =====================
-// GAME DATA
+// CAMERA
 // =====================
-
-let rings = 0;
 
 let camera = {
     x:0
@@ -62,89 +58,52 @@ let camera = {
 // INPUT
 // =====================
 
-let keys={};
+let keys = {};
 
 
 document.addEventListener("keydown", e=>{
-    keys[e.key]=true;
+    keys[e.key] = true;
 });
 
 
 document.addEventListener("keyup", e=>{
-    keys[e.key]=false;
+    keys[e.key] = false;
 });
+
 
 
 // =====================
 // COLLISION
 // =====================
 
-function checkCollision(){
+function collision(){
+
+    player.grounded = false;
 
 
-    player.grounded=false;
+    for(let p of greenHill.platforms){
 
 
-    for(let platform of greenHill.platforms){
-
-
-        // landing on platforms
+        // falling onto platform
 
         if(
 
-            player.x < platform.x + platform.w &&
+            player.x < p.x + p.w &&
+            player.x + player.width > p.x &&
 
-            player.x + player.width > platform.x &&
+            player.y + player.height > p.y &&
 
-            player.y + player.height > platform.y &&
-
-            player.y + player.height < platform.y + platform.h + 20 &&
+            player.y + player.height < p.y + p.h + 15 &&
 
             player.vy >= 0
 
         ){
 
-            player.y = platform.y - player.height;
+            player.y = p.y - player.height;
 
             player.vy = 0;
 
-            player.grounded=true;
-
-        }
-
-    }
-
-}
-
-
-
-// =====================
-// RINGS
-// =====================
-
-function checkRings(){
-
-
-    for(let i = greenHill.rings.length-1; i>=0; i--){
-
-
-        let ring = greenHill.rings[i];
-
-
-        if(
-
-            Math.abs(player.x-ring.x)<40 &&
-
-            Math.abs(player.y-ring.y)<60
-
-        ){
-
-            greenHill.rings.splice(i,1);
-
-            rings++;
-
-
-            document.getElementById("rings").innerText=rings;
+            player.grounded = true;
 
         }
 
@@ -161,15 +120,16 @@ function checkRings(){
 function update(){
 
 
-
     // movement
 
-    if(keys["ArrowRight"])
+    if(keys["ArrowRight"]){
         player.vx += player.speed;
+    }
 
 
-    if(keys["ArrowLeft"])
+    if(keys["ArrowLeft"]){
         player.vx -= player.speed;
+    }
 
 
 
@@ -178,6 +138,8 @@ function update(){
     player.vx *= 0.85;
 
 
+
+    // speed limit
 
     if(player.vx > player.maxSpeed)
         player.vx = player.maxSpeed;
@@ -188,13 +150,14 @@ function update(){
 
 
 
+
     // jump
 
     if(keys[" "] && player.grounded){
 
         player.vy = player.jumpPower;
 
-        player.grounded=false;
+        player.grounded = false;
 
     }
 
@@ -206,29 +169,27 @@ function update(){
 
 
 
+    // move
+
     player.x += player.vx;
 
     player.y += player.vy;
 
 
 
-    checkCollision();
-
-    checkRings();
+    collision();
 
 
 
     // death
 
-    if(player.y > canvas.height){
+    if(player.y > canvas.height + 200){
 
         player.x = greenHill.spawn.x;
-
         player.y = greenHill.spawn.y;
 
-        player.vx=0;
-
-        player.vy=0;
+        player.vx = 0;
+        player.vy = 0;
 
     }
 
@@ -240,8 +201,7 @@ function update(){
 
 
     if(camera.x < 0)
-
-        camera.x=0;
+        camera.x = 0;
 
 
 }
@@ -266,7 +226,7 @@ function draw(){
 
     // sky
 
-    ctx.fillStyle="#55c9ff";
+    ctx.fillStyle = "#55c9ff";
 
     ctx.fillRect(
         0,
@@ -279,14 +239,14 @@ function draw(){
 
     // platforms
 
-    ctx.fillStyle="#35b52a";
+    ctx.fillStyle = "#35b52a";
 
 
     for(let p of greenHill.platforms){
 
         ctx.fillRect(
 
-            p.x-camera.x,
+            p.x - camera.x,
 
             p.y,
 
@@ -300,68 +260,82 @@ function draw(){
 
 
 
-    // rings
+    // choose Metal sprite
 
-    for(let ring of greenHill.rings){
+    let sprite = metalIdle;
 
 
-        ctx.drawImage(
+    if(!player.grounded){
 
-            ringSprite,
+        sprite = metalJump;
 
-            ring.x-camera.x-16,
+    }
 
-            ring.y-16,
+    else if(Math.abs(player.vx) > 1){
 
-            32,
-
-            32
-
-        );
+        sprite = metalRun;
 
     }
 
 
 
-    // choose metal sprite
 
-    let sprite = metalIdle;
+    // draw Metal Sonic correctly
 
-
-    if(!player.grounded)
-
-        sprite = metalJump;
+    if(sprite.complete){
 
 
-    else if(Math.abs(player.vx)>1)
-
-        sprite = metalRun;
+        let scale = 2;
 
 
+        let width = sprite.width * scale;
+
+        let height = sprite.height * scale;
 
 
-    // draw metal sonic
+        ctx.drawImage(
 
-    ctx.drawImage(
+            sprite,
 
-        sprite,
+            player.x - camera.x - (width-player.width)/2,
 
-        player.x-camera.x,
+            player.y - (height-player.height),
 
-        player.y,
+            width,
 
-        60,
+            height
 
-        90
+        );
 
-    );
+    }
+
+    else{
+
+
+        // fallback
+
+        ctx.fillStyle="blue";
+
+        ctx.fillRect(
+
+            player.x-camera.x,
+
+            player.y,
+
+            player.width,
+
+            player.height
+
+        );
+
+    }
 
 }
 
 
 
 // =====================
-// LOOP
+// GAME LOOP
 // =====================
 
 function gameLoop(){

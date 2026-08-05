@@ -1,9 +1,14 @@
 <!DOCTYPE html>
 <html>
+
 <head>
-<title>Metal Sonic: ChronoFix</title>
+
+<title>Metal Sonic: Chronofix</title>
+
+<link rel="icon" type="image/jpeg" href="icon.jpeg">
 
 <style>
+
 body {
     margin: 0;
     overflow: hidden;
@@ -15,47 +20,64 @@ canvas {
 }
 
 #hud {
+
     position: absolute;
     top: 15px;
     left: 15px;
+
     color: white;
     font-family: Arial;
     font-size: 24px;
+
     text-shadow: 2px 2px black;
 }
+
 </style>
 
 </head>
 
+
 <body>
 
+
 <div id="hud">
+
 Metal Sonic: Chrono Fix<br>
 Rings: <span id="rings">0</span>
+
 </div>
+
 
 <canvas id="game"></canvas>
 
 
+
 <script>
+
 
 const canvas = document.getElementById("game");
 const ctx = canvas.getContext("2d");
+
 
 canvas.width = window.innerWidth;
 canvas.height = window.innerHeight;
 
 
-// SPRITES
+
+// METAL SONIC SPRITES
 
 const metalIdle = new Image();
 metalIdle.src = "sprites/metal/idle.png";
 
+
 const metalRun = new Image();
 metalRun.src = "sprites/metal/run.png";
 
+
 const metalJump = new Image();
 metalJump.src = "sprites/metal/jump.png";
+
+
 
 
 // PLAYER
@@ -65,7 +87,6 @@ let player = {
     x:200,
     y:300,
 
-    // collision size (not sprite size)
     width:40,
     height:70,
 
@@ -81,50 +102,71 @@ let player = {
 };
 
 
+
 // CAMERA
 
 let camera = {
+
     x:0
+
 };
+
 
 
 // LEVEL
 
 let level = {
+
     width:5000,
     ground:450
+
 };
 
 
-// INPUT
+
+// CONTROLS
 
 let keys={};
 
 
 document.addEventListener("keydown", e=>{
+
     keys[e.key]=true;
+
 });
 
 
 document.addEventListener("keyup", e=>{
+
     keys[e.key]=false;
+
 });
+
+
 
 
 // UPDATE
 
 function update(){
 
+
     if(keys["ArrowRight"]){
+
         player.vx += player.speed;
+
     }
 
+
     if(keys["ArrowLeft"]){
+
         player.vx -= player.speed;
+
     }
+
 
 
     player.vx *= 0.85;
+
 
 
     if(player.vx > player.maxSpeed)
@@ -139,6 +181,7 @@ function update(){
     if(keys[" "] && player.grounded){
 
         player.vy = player.jumpPower;
+
         player.grounded=false;
 
     }
@@ -148,26 +191,33 @@ function update(){
     player.vy += 0.7;
 
 
+
     player.x += player.vx;
     player.y += player.vy;
 
 
 
+    // GROUND
+
     if(player.y + player.height >= level.ground){
 
         player.y = level.ground - player.height;
 
-        player.vy = 0;
-        player.grounded = true;
+        player.vy=0;
+
+        player.grounded=true;
 
     }
 
 
 
+    // DEATH
+
     if(player.y > canvas.height){
 
         player.x=200;
         player.y=200;
+
         player.vx=0;
         player.vy=0;
 
@@ -175,13 +225,18 @@ function update(){
 
 
 
+    // CAMERA FOLLOW
+
     camera.x = player.x - 300;
 
 
     if(camera.x < 0)
+
         camera.x=0;
 
 }
+
+
 
 
 
@@ -189,87 +244,115 @@ function update(){
 
 function draw(){
 
-ctx.clearRect(0,0,canvas.width,canvas.height);
+
+    ctx.clearRect(
+        0,
+        0,
+        canvas.width,
+        canvas.height
+    );
 
 
-// background
 
-ctx.fillStyle="#55c9ff";
-ctx.fillRect(0,0,canvas.width,canvas.height);
+    // SKY
 
+    ctx.fillStyle="#55c9ff";
 
-// ground
-
-ctx.fillStyle="#35b52a";
-
-ctx.fillRect(
-    -camera.x,
-    level.ground,
-    level.width,
-    canvas.height
-);
+    ctx.fillRect(
+        0,
+        0,
+        canvas.width,
+        canvas.height
+    );
 
 
-// choose sprite
 
-let sprite = metalIdle;
+    // GROUND
+
+    ctx.fillStyle="#35b52a";
+
+    ctx.fillRect(
+
+        -camera.x,
+        level.ground,
+        level.width,
+        canvas.height
+
+    );
 
 
-if(!player.grounded){
 
-    sprite = metalJump;
+
+    // PICK SPRITE
+
+    let sprite = metalIdle;
+
+
+
+    if(!player.grounded){
+
+        sprite = metalJump;
+
+    }
+
+    else if(Math.abs(player.vx)>1){
+
+        sprite = metalRun;
+
+    }
+
+
+
+
+    // DRAW METAL SONIC
+
+    let spriteWidth = sprite.width * 0.5;
+    let spriteHeight = sprite.height * 0.5;
+
+
+
+    ctx.drawImage(
+
+        sprite,
+
+        player.x-camera.x-(spriteWidth-player.width)/2,
+
+        player.y-(spriteHeight-player.height),
+
+        spriteWidth,
+
+        spriteHeight
+
+    );
+
+
 
 }
 
-else if(Math.abs(player.vx)>1){
-
-    sprite = metalRun;
-
-}
 
 
 
-// draw sprite without stretching
+// GAME LOOP
 
-let spriteWidth = sprite.width * 0.5;
-let spriteHeight = sprite.height * 0.5;
+function gameLoop(){
 
+    update();
 
-ctx.drawImage(
+    draw();
 
-    sprite,
-
-    player.x - camera.x - (spriteWidth-player.width)/2,
-
-    player.y - (spriteHeight-player.height),
-
-    spriteWidth,
-
-    spriteHeight
-
-);
-
-
+    requestAnimationFrame(gameLoop);
 
 }
 
 
 
-// LOOP
-
-function loop(){
-
-update();
-draw();
-
-requestAnimationFrame(loop);
-
-}
+gameLoop();
 
 
-loop();
 
 </script>
 
+
 </body>
+
 </html>

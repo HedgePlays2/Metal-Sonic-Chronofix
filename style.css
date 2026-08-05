@@ -1,1 +1,23 @@
+html, body {
+    margin: 0;
+    overflow: hidden;
+    background: #55c9ff;
+    font-family: Arial, sans-serif;
+}
 
+canvas {
+    display: block;
+    width: 100vw;
+    height: 100vh;
+}
+
+#hud {
+    position: absolute;
+    top: 15px;
+    left: 15px;
+    color: white;
+    font-size: 22px;
+    text-shadow: 2px 2px black;
+    user-select: none;
+    z-index: 10;
+}

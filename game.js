@@ -20,7 +20,7 @@ metalJump.src = "sprites/metal/jump.png";
 
 
 const ringSprite = new Image();
-ringSprite.src = "sprites/rings/ring.gif";
+ringSprite.src = "sprites/rings/ring.png";
 
 
 // =====================

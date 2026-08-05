@@ -52,7 +52,12 @@ let player = {
 let camera = {
     x:0
 };
+let rings = 0;
 
+let checkpoint = {
+    x: greenHill.spawn.x,
+    y: greenHill.spawn.y
+};
 
 // =====================
 // INPUT
@@ -185,8 +190,8 @@ function update(){
 
     if(player.y > canvas.height + 200){
 
-        player.x = greenHill.spawn.x;
-        player.y = greenHill.spawn.y;
+        player.x = checkpoint.x;
+        player.y = checkpoint.y;
 
         player.vx = 0;
         player.vy = 0;
@@ -202,8 +207,45 @@ function update(){
 
     if(camera.x < 0)
         camera.x = 0;
+    collision();
 
+for(let i = greenHill.rings.length-1; i >= 0; i--){
 
+    let ring = greenHill.rings[i];
+
+    if(
+        Math.abs(player.x-ring.x)<40 &&
+        Math.abs(player.y-ring.y)<50
+    ){
+
+        greenHill.rings.splice(i,1);
+
+        rings++;
+
+        document.getElementById("rings").innerText = rings;
+
+    }
+
+}
+
+for(let point of greenHill.checkpoints){
+
+    if(
+        Math.abs(player.x-point.x)<50 &&
+        !point.activated
+    ){
+
+        point.activated=true;
+
+        checkpoint.x=point.x;
+
+        checkpoint.y=point.y-50;
+
+        console.log("Checkpoint!");
+
+    }
+
+}
 }
 
 

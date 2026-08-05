@@ -1,4 +1,4 @@
-# ⚡ Metal Sonic: Chrono Fix
+# ⚡ Metal Sonic: Chronofix
 
 > A Sonic the Hedgehog fangame where Metal Sonic becomes the hero.
 
